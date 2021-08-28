@@ -1,0 +1,8 @@
+## Syntax
+
+`varwle` \[`, estimates(estname) separator(#)`\]
+
+`varwle` can be used only after `var` or `svar`; see
+[<strong>[TS] var</strong>](http://www.stata.com/help.cgi?var)
+and
+[<strong>[TS] var svar</strong>](http://www.stata.com/help.cgi?svar).

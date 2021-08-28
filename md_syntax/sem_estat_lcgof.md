@@ -1,0 +1,3 @@
+## Syntax
+
+`estat lcgof` \[`, nodescribe`\]

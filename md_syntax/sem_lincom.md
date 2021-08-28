@@ -1,0 +1,3 @@
+## Syntax
+
+`lincom exp` \[`, options`\]

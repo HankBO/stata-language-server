@@ -1,0 +1,3 @@
+## Syntax
+
+`svymarkout` \[`markvar`\]

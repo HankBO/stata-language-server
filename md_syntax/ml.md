@@ -1,0 +1,230 @@
+## Syntax
+
+ml model in interactive mode
+
+`ml model`<span options="3">{space 3}_ `method progname eq`
+\[`eq` ...\] _\[`if`\] \[`in`\]_ \[`weight`\]
+\[`, model_options svy diparm_options`\]
+
+`ml model`<span options="3">{space 3}_ `method funcname()`
+`eq` \[`eq` ...\] _\[`if`\] \[`in`\]_
+\[`weight`\] \[`, model_options svy diparm_options`\]
+
+ml model in noninteractive mode
+
+`ml model`<span options="3">{space 3}_ `method progname eq`
+\[`eq` ...\] _\[`if`\] \[`in`\]_
+\[`weight`\]`, maximize` \[`model_options svy diparm_options`
+`noninteractive_options`\]
+
+`ml model`<span options="3">{space 3}_ `method funcname()`
+`eq` \[`eq` ...\] _\[`if`\] \[`in`\]_
+\[`weight`\]`, maximize` \[`model_options svy diparm_options`
+`noninteractive_options`\]
+
+Noninteractive mode is invoked by specifying the `maximize` option. Use
+`maximize` when `ml` will be used as a subroutine of another ado-file or
+program and you want to carry forth the problem, from definition to
+posting of results, in one command.
+
+`ml clear`
+
+`ml query`
+
+`ml check`
+
+`ml search`<span options="2">{space 2}_ \[\[`/`\]`eqname`\[`:`\]
+`#lb #ub` \] \[`...`\] \[`, search_options`\]
+
+`ml plot`<span options="4">{space 4}_ \[`eqname:`\]`name`
+\[`#` \[`#` \[`#`\]\]\] \[`, saving:(filename`\[`, replace`\]`)`\]
+
+`ml init`<span options="4">{space 4}_ <span options="-(">{c
+-(}_ \[`eqname:`\]`name=#` \| `/eqname=#` <span
+options=")-">{c )-}_ \[`...`\]
+
+`ml init`<span options="5">{space 5}_`#` \[`# ...`\]`, copy`
+
+`ml init`<span options="5">{space 5}_`matname` \[`, copy skip`
+\]
+
+`ml report`
+
+`ml trace`<span options="4">{space 4}_<span options="-(">{c
+-(}_ `on` \| `off` }
+
+`ml count`<span options="4">{space 4}_\[ `clear` \| `on` \| `off`
+\]
+
+`ml maximize` \[`, ml_maximize_options display_options`
+`eform_option`\]
+
+`ml graph`<span options="4">{space 4}_\[`#`\] \[`,`
+`saving:(filename`\[`, replace`\]`)` \]
+
+`ml display`<span options="2">{space 2}_\[`, display_options`
+`eform_option`\]
+
+`ml footnote`
+
+`ml score`
+[newvar](http://www.stata.com/help.cgi?newvar)
+_\[`if`\] \[`in`\]_ \[`,`
+`ml_score_options`\]
+
+`ml score newvarlist` _\[`if`\] \[`in`\]_
+\[`,`
+**[](http://www.stata.com/help.cgi?ml_score)**
+
+ing\]
+
+`ml score` \[`type`\] `stub*` _\[`if`\]
+\[`in`\]_ \[`,`
+**[](http://www.stata.com/help.cgi?ml_score)**
+
+ing\]
+
+where `method` is one of
+
+`lf`<span style="padding-left: 12.5rem;">_`d0`<span
+style="padding-left: 18.5rem;">_`lf0`<span
+style="padding-left: 24.5rem;">_`gf0`
+
+`d1`<span style="padding-left: 18.5rem;">_`lf1`
+
+`d1debug`<span style="padding-left: 18.5rem;">_`lf1debug`
+
+`d2`<span style="padding-left: 18.5rem;">_`lf2`
+
+`d2debug`<span style="padding-left: 18.5rem;">_`lf2debug`
+
+or `method` can be specified using one of the longer, more descriptive
+names
+
+|            |                              |
+|------------|------------------------------|
+| `method`   | Longer name {p2line None}    |
+| `lf`       | `linearform`                 |
+| `d0`       | `derivative0`                |
+| `d1`       | `derivative1`                |
+| `d1debug`  | `derivative1debug`           |
+| `d2`       | `derivative2`                |
+| `d2debug`  | `derivative2debug`           |
+| `lf0`      | `linearform0`                |
+| `lf1`      | `linearform1`                |
+| `lf1debug` | `linearform1debug`           |
+| `lf2`      | `linearform2`                |
+| `lf2debug` | `linearform2debug`           |
+| `gf0`      | `generalform0` {p2line None} |
+
+`eq` is the equation to be estimated, enclosed in parentheses, and
+optionally with a name to be given to the equation, preceded by a colon,
+
+`(` \[`eqname:`\] \[`varlist_y =`\] \[`varlist_x`\] \[`,`
+`eq_options`\] `)`
+
+or `eq` is the name of a parameter, such as sigma, with a slash in front
+
+`/eqname`<span options="6">{space 6}_which is equivalent to<span
+options="4">{space 4}_`(eqname:, freeparm)`
+
+<span options="diparm_options">{marker diparm\_options}_{nobreak
+None} and `diparm_options` is one or more `diparm(diparm_args)` options
+where `diparm_args` is either `__sep__` or anything accepted by the
+"undocumented" `_diparm` command; see
+[<strong>[P]</strong> _diparm](http://www.stata.com/help.cgi?_diparm).
+
+| [<strong>eq_options</strong>](#eq_options_descript) |                       | Description                                                        |
+|--------------------------------------------------------------------------------|-----------------------|--------------------------------------------------------------------|
+|                                                                                | `noconstant`          | do not include an intercept in the equation                        |
+|                                                                                | `offset(varname_o)`   | include `varname_o` in model with coefficient constrained to 1     |
+|                                                                                | `exposure(varname_e)` | include ln(`varname_e`) in model with coefficient constrained to 1 |
+|                                                                                | `freeparm`            | `eqname` is a free parameter                                       |
+
+| [<strong>model_options</strong>](#mlmode) |                        | Description                                                                                                         |
+|----------------------------------------------------------------------|------------------------|---------------------------------------------------------------------------------------------------------------------|
+|                                                                      | `group(varname)`       | use `varname` to identify groups                                                                                    |
+|                                                                      | `vce(vcetype)`         | `vcetype` may be `robust`, `cluster clustvar`, `oim`, or `opg`                                                    |
+|                                                                      | `constraints(numlist)` | constraints by number to be applied                                                                                 |
+|                                                                      | `constraints(matname)` | matrix that contains the constraints to be applied                                                                  |
+|                                                                      | `nocnsnotes`           | do not display notes when constraints are dropped                                                                   |
+|                                                                      | `title(string)`        | place a title on the estimation output                                                                              |
+|                                                                      | `nopreserve`           | do not preserve the estimation subsample in memory                                                                  |
+|                                                                      | `collinear`            | keep collinear variables within equations                                                                           |
+|                                                                      | `missing`              | keep observations containing variables with missing values                                                          |
+|                                                                      | `lf0(#k #ll)`          | number of parameters and log-likelihood value of the constant-only model                                            |
+|                                                                      | `continue`             | specifies that a model has been fit and sets the initial values b\_0 for the model to be fit based on those results |
+|                                                                      | `waldtest(#)`          | perform a Wald test; see `Options for use with ml model in interactive or noninteractive mode` below                |
+|                                                                      | `obs(#)`               | number of observations                                                                                              |
+|                                                                      | `"crittype(string)`    | describe the criterion optimized by `ml`                                                                            |
+|                                                                      | `subpop(varname)`      | compute estimates for the single subpopulation                                                                      |
+|                                                                      | `nosvyadjust`          | carry out Wald test as W/k distributed F(k,d)                                                                       |
+|                                                                      | `technique(nr)`        | Stata's modified Newton-Raphson (NR) algorithm                                                                      |
+|                                                                      | `technique(bhhh)`      | Berndt-Hall-Hall-Hausman (BHHH) algorithm                                                                           |
+|                                                                      | `technique(dfp)`       | Davidon-Fletcher-Powell (DFP) algorithm                                                                             |
+|                                                                      | `technique(bfgs)`      | Broyden-Fletcher-Goldfarb-Shanno (BFGS) algorithm                                                                   |
+
+| [<strong>noninteractive_options</strong>](#ml_noninteract_descript) |                            | Description                                                      |
+|------------------------------------------------------------------------------------------------|----------------------------|------------------------------------------------------------------|
+|                                                                                                | `init(ml_init_args)`       | set the initial values b\_0                                      |
+|                                                                                                | `search(on)`               | equivalent to `ml search, repeat(0)`; the default                |
+|                                                                                                | `search(norescale)`        | equivalent to `ml search, repeat(0) norescale`                   |
+|                                                                                                | `search(quietly)`          | same as `search(on)`, except that output is suppressed           |
+|                                                                                                | `search(off)`              | prevents calling `ml search`                                     |
+|                                                                                                | `repeat(#)`                | `ml search`'s `repeat()` option; see below                       |
+|                                                                                                | `bounds(ml_search_bounds)` | specify bounds for `ml search`                                   |
+|                                                                                                | `nowarning`                | suppress "convergence not achieved" message of `iterate(0)`      |
+|                                                                                                | `novce`                    | substitute the zero matrix for the variance matrix               |
+|                                                                                                | `negh`                     | indicates that the evaluator returns the negative Hessian matrix |
+|                                                                                                | `score(newvars)`           | new variables containing the contribution to the score           |
+|                                                                                                | `maximize_options`         | control the maximization process; seldom used                    |
+
+| [<strong>search_options</strong>](#ml_search_descript) |                    | Description                                                                                                                                       |
+|-----------------------------------------------------------------------------------|--------------------|---------------------------------------------------------------------------------------------------------------------------------------------------|
+|                                                                                   | `repeat(#)`        | number of random attempts to find better initial-value vector; default is `repeat(10)` in interactive mode and `repeat(0)` in noninteractive mode |
+|                                                                                   | `restart`          | use random actions to find starting values; not recommended                                                                                       |
+|                                                                                   | `norescale`        | do not rescale to improve parameter vector; not recommended                                                                                       |
+|                                                                                   | `maximize_options` | control the maximization process; seldom used                                                                                                     |
+
+| [<strong>ml_maximize_options</strong>](#ml_max_descript) |                                 | Description                                                      |
+|-------------------------------------------------------------------------------------|---------------------------------|------------------------------------------------------------------|
+|                                                                                     | `nowarning`                     | suppress "convergence not achieved" message of `iterate(0)`      |
+|                                                                                     | `novce`                         | substitute the zero matrix for the variance matrix               |
+|                                                                                     | `negh`                          | indicates that the evaluator returns the negative Hessian matrix |
+|                                                                                     | `score(newvars` \| `stub*)` | new variables containing the contribution to the score           |
+|                                                                                     | `nooutput`                      | suppress display of final results                                |
+|                                                                                     | `noclear`                       | do not clear ml problem definition after model has converged     |
+|                                                                                     | `maximize_options`              | control the maximization process; seldom used                    |
+
+| [<strong>display_options</strong>](#mldisplay) |                 | Description                                                                                                           |
+|---------------------------------------------------------------------------|-----------------|-----------------------------------------------------------------------------------------------------------------------|
+|                                                                           | `noheader`      | suppress header display above the coefficient table                                                                   |
+|                                                                           | `nofootnote`    | suppress footnote display below the coefficient table                                                                 |
+|                                                                           | `level(#)`      | set confidence level; default is `level(95)`                                                                          |
+|                                                                           | `first`         | display coefficient table reporting results for first equation only                                                   |
+|                                                                           | `neq(#)`        | display coefficient table reporting first `#` equations                                                               |
+|                                                                           | `showeqns`      | display equation names in the coefficient table                                                                       |
+|                                                                           | `plus`          | display coefficient table ending in dashes<span options="-">{c -}_plus-sign<span options="-">{c -}_dashes |
+|                                                                           | `nocnsreport`   | suppress constraints display above the coefficient table                                                              |
+|                                                                           | `noomitted`     | suppress display of omitted variables                                                                                 |
+|                                                                           | `vsquish`       | suppress blank space separating factor-variable terms or time-series-operated variables from other variables          |
+|                                                                           | `noemptycells`  | suppress empty cells for interactions of factor variables                                                             |
+|                                                                           | `baselevels`    | report base levels of factor variables and interactions                                                               |
+|                                                                           | `allbaselevels` | display all base levels of factor variables and interactions                                                          |
+|                                                                           | `cformat(%fmt)` | format the coefficients, standard errors, and confidence limits in the coefficient table                              |
+|                                                                           | `pformat(%fmt)` | format the p-values in the coefficient table                                                                          |
+|                                                                           | `sformat(%fmt)` | format the test statistics in the coefficient table                                                                   |
+|                                                                           | `nolstretch`    | do not automatically widen the coefficient table to accommodate longer variable names                                 |
+|                                                                           | `coeflegend`    | display legend instead of statistics                                                                                  |
+
+| eform\_option                                                                                                                                                                                                                                                                                                                                                                                                                                                                              |                 | Description                                                    |
+|--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|-----------------|----------------------------------------------------------------|
+|                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            | `eform(string)` | display exponentiated coefficients; column title is "string"   |
+|                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            | `eform`         | display exponentiated coefficients; column title is "`exp(b)`" |
+|                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            | `hr`            | report hazard ratios                                           |
+|                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            | `shr`           | report subhazard ratios                                        |
+|                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            | `irr`           | report incidence-rate ratios                                   |
+|                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            | `or`            | report odds ratios                                             |
+|                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            | `rrr`           | report relative-risk ratios                                    |
+| `fweight`s, `aweight`s, `iweight`s, and `pweight`s are allowed; see [<strong>weight</strong>](http://www.stata.com/help.cgi?weight). With all but methods lf, you must write your likelihood-evaluation program carefully if `pweight`s are to be specified, and `pweight`s may not be specified with method d0, d1, d1debug, d2, or d2debug. See [<strong>Gould, Pitblado, and Poi (2010, chap. 6)</strong>](#GPP2010) for details. |                 |                                                                |
+| See [<strong>estcom</strong>](http://www.stata.com/help.cgi?estcom) for more capabilities of estimation commands. To redisplay results, type `ml display`.                                                                                                                                                                                                                                                                                                      |                 |                                                                |

@@ -1,0 +1,3 @@
+## Syntax
+
+`graph play recordingname`

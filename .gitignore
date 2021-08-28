@@ -1,0 +1,6 @@
+*.log
+node_modules
+.vscode/settings.json
+server/__pycache__
+__pycache__
+.mypy_cache

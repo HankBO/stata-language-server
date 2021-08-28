@@ -1,0 +1,3 @@
+## Syntax
+
+`void displayflush()`

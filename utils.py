@@ -1,41 +1,34 @@
 
 import os
-from pygls.types import (CompletionItem, CompletionList,
-                         CompletionItemKind, MarkupContent)
+from pygls.lsp.types import (CompletionItem, CompletionList,
+                             CompletionItemKind, MarkupContent)
 
 
 def getDocstringFromWord(word: str, doc_path: str = 'md_syntax') -> MarkupContent:
-    # summarize
-    # _
+
     try:
-        with open(os.path.join(doc_path, word+".md"), 'r') as f:
+        with open(os.path.join(doc_path, word + ".md"), 'r') as f:
             docstring = f.read()
     except FileNotFoundError:
-            docstring = ""
+        docstring = ""
     return MarkupContent(
             kind = 'markdown',
             value = docstring
     )
 
-def getComItemFromFilename(fn: str, doc_path: str) -> CompletionItem:
 
-    comItem = CompletionItem(
-			    label = fn,
-			    kind = CompletionItemKind.Method
-                )
+def getComItemFromFilename(name: str, kind=CompletionItemKind.Keyword, doc_path: str = "") -> CompletionItem:
+
+    comItem = CompletionItem(label=name, kind=kind, documentation=doc_path)
     return comItem
 
-def getComList(doc_path: str='md_syntax', saveFile=False) -> CompletionList:
+
+def getComList(doc_path: str = 'md_syntax') -> CompletionList:
     all_fn = os.listdir(doc_path)
     itemList = []
     for base_fn in all_fn:
-        comItem = getComItemFromFilename(base_fn.split('.')[0], doc_path)
+        comItem = getComItemFromFilename(name=base_fn.split('.')[0], doc_path=doc_path)
         itemList.append(comItem)
 
-    comList = CompletionList(False, itemList)
-    if saveFile == True:
-        with open('comlist.py', 'w') as f: # 
-            f.write(str(comList))
+    comList = CompletionList(is_incomplete=False, items=itemList)
     return comList
-
-#getComList('md_syntax', saveFile=True)

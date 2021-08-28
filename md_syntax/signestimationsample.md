@@ -1,0 +1,5 @@
+## Syntax
+
+`signestimationsample varlist`
+
+`checkestimationsample`

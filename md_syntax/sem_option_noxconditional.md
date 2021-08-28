@@ -1,0 +1,3 @@
+## Syntax
+
+`sem` ... \[`,` ... `noxconditional` ...\]

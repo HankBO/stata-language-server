@@ -1,0 +1,16 @@
+## Syntax
+
+`sttocc`
+\[[varlist](http://www.stata.com/help.cgi?varlist)\]
+\[`, options`\]
+
+| Options                                                                                                                                                                   |                           | Description                                                                                                              |
+|---------------------------------------------------------------------------------------------------------------------------------------------------------------------------|---------------------------|--------------------------------------------------------------------------------------------------------------------------|
+| Main                                                                                                                                                                      |                           |                                                                                                                          |
+|                                                                                                                                                                           | `match(matchvarlist)`     | match cases and controls on analysis time and specified categorical variables; default is to match on analysis time only |
+|                                                                                                                                                                           | `number(#)`               | use `#` controls for each case; default is `number(1)`                                                                   |
+|                                                                                                                                                                           | `nodots`                  | suppress displaying dots during calculation                                                                              |
+| Options                                                                                                                                                                   |                           |                                                                                                                          |
+|                                                                                                                                                                           | `generate(case set time)` | new variable names; default is `_case`, `_set`, and `_time`                                                              |
+| You must `stset` your data before using `sttocc`; see [<strong>[ST]</strong> stset](http://www.stata.com/help.cgi?stset).                      |                           |                                                                                                                          |
+| `fweight`s, `iweight`s, and `pweight`s may be specified using `stset`; see [<strong>[ST]</strong> stset](http://www.stata.com/help.cgi?stset). |                           |                                                                                                                          |

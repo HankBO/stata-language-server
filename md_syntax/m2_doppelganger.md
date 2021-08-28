@@ -1,0 +1,3 @@
+## Syntax
+
+`functiontypefunctionname(){c -(}{c )-}`

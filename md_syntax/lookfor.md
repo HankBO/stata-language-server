@@ -1,0 +1,3 @@
+## Syntax
+
+`lookfor string` \[`string` \[...\]\]

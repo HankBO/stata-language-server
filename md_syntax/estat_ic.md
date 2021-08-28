@@ -1,0 +1,3 @@
+## Syntax
+
+`estat ic,n(#)`

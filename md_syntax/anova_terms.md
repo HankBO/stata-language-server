@@ -1,0 +1,3 @@
+## Syntax
+
+`anova_terms`

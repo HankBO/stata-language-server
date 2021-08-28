@@ -1,0 +1,3 @@
+## Syntax
+
+`returnreturn(exp)`

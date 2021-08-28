@@ -1,0 +1,13 @@
+## Syntax
+
+`_vce_parse` \[`markvar`\] \[`, options` \] `:` <span
+class="command">\[`weight`\]_ \[, `vce(vcetype)`
+`cluster(varname) robust` \]
+
+| Options                                                                                                                                                                                                                                                                                   |                        | Description                                 |
+|-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|------------------------|---------------------------------------------|
+|                                                                                                                                                                                                                                                                                           | `optlist(vcetypes)`    | `vcetypes` that do not allow arguments      |
+|                                                                                                                                                                                                                                                                                           | `argoptlist(vcetypes)` | `vcetypes` that require arguments           |
+|                                                                                                                                                                                                                                                                                           | `pwallowed(vcetypes)`  | `vcetypes` that are allowed with `pweight`s |
+|                                                                                                                                                                                                                                                                                           | `old`                  | allow `cluster()` and `robust`              |
+| `vcetypes` is one or more names allowed to be used in the `vce()` option. Use capital letters to specify minimum abbreviations as in [<strong>syntax</strong>](http://www.stata.com/help.cgi?syntax). Capital letters in the `pwallowed()` option are ignored. |                        |                                             |

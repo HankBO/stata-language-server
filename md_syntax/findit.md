@@ -1,0 +1,3 @@
+## Syntax
+
+`findit word` \[`word ...`\]

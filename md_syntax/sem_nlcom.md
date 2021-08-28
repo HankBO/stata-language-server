@@ -1,0 +1,3 @@
+## Syntax
+
+`nlcom exp` \[`, options`\]

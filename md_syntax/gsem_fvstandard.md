@@ -1,0 +1,3 @@
+## Syntax
+
+`gsem` ... \[`, fvstandard` ...\]

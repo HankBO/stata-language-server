@@ -1,0 +1,3 @@
+## Syntax
+
+`set maxbezierpath #` \[`, permanently` \]

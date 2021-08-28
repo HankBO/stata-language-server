@@ -13,7 +13,7 @@ Only Paragraph `Syntax` in a help-file will be showed while hovering.
 
     Auto-Completion for most stata commands. Only support complete syntax(eg: `generate`, not `g(enerate)`) now.
 
-    ![completion](./assets/img/readme/completion.gif)
+    ![completion](https://github.com/HankBO/stata-language-server/blob/develop/assets/img/completion.gif)
 
 - Syntax tips while hovering
 
@@ -21,13 +21,13 @@ Only Paragraph `Syntax` in a help-file will be showed while hovering.
 
     Note: 1.this feature is not available for uncomplete commands(eg: `g`, `gen`) now. 2.some commands have no own help files since they are included in other commands(eg: `replace` belongs to `generate`)
 
-    ![hover](./assets/img/readme/hover.gif)
+    ![hover](https://github.com/HankBO/stata-language-server/blob/develop/assets/img/hover.gif)
 
 - Goto Definition(`generate varname =`)
 
     When right-click a variable name and click `Go to Definition`, this feature will find the last `generate` place before. It can match pattern like `g(enerate)`.
 
-    ![gotoDefinition](./assets/img/readme/gotoDefinition.gif)
+    ![gotoDefinition](https://github.com/HankBO/stata-language-server/blob/develop/assets/img/gotoDefinition.gif)
 
 ## Install Server Dependencies
 

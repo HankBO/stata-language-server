@@ -2,9 +2,13 @@
 .gitignore
 client/out/*.map
 client/src/
-tsconfig.json
+**/tsconfig.json
 tslint.json
 package.json
 package-lock.json
 
 .pytest_cache
+server/__pycache__
+__pycache__
+.mypy_cache
+*.log

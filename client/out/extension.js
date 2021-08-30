@@ -22,7 +22,7 @@ exports.deactivate = exports.activate = void 0;
 const net = require("net");
 const path = require("path");
 const vscode_1 = require("vscode");
-const vscode_languageclient_1 = require("vscode-languageclient");
+const node_1 = require("vscode-languageclient/node");
 let client;
 function getClientOptions() {
     return {
@@ -53,7 +53,7 @@ function startLangServerTCP(addr) {
             });
         });
     };
-    return new vscode_languageclient_1.LanguageClient(`tcp lang server (port ${addr})`, serverOptions, getClientOptions());
+    return new node_1.LanguageClient(`tcp lang server (port ${addr})`, serverOptions, getClientOptions());
 }
 function startLangServer(command, args, cwd) {
     const serverOptions = {
@@ -61,7 +61,7 @@ function startLangServer(command, args, cwd) {
         command,
         options: { cwd },
     };
-    return new vscode_languageclient_1.LanguageClient(command, serverOptions, getClientOptions());
+    return new node_1.LanguageClient(command, serverOptions, getClientOptions());
 }
 function activate(context) {
     if (isStartedInDebugMode()) {

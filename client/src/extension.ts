@@ -21,7 +21,7 @@
 import * as net from "net";
 import * as path from "path";
 import { ExtensionContext, workspace } from "vscode";
-import { LanguageClient, LanguageClientOptions, ServerOptions } from "vscode-languageclient";
+import { LanguageClient, LanguageClientOptions, ServerOptions } from "vscode-languageclient/node";
 
 let client: LanguageClient;
 

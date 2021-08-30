@@ -33,13 +33,15 @@ Only Paragraph `Syntax` in a help-file will be showed while hovering.
 
 - [pygls](https://github.com/openlawlibrary/pygls)(0.11.2)
 
+    `pip3 install pygls`
+
 ## Future Plan
 
 Following Features will be implemented:
 
 - [ ] Codestyle diagnostics
-- [ ] Brief commands completion(like `forval`)
 - [ ] Docstring IO optimization, less file size
+- [ ] Brief commands completion(like `forval`)
 
 ## Resources Referenced
 

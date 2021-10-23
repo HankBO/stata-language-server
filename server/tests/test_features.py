@@ -1,5 +1,5 @@
 from typing import Optional
-from pygls.lsp.types.basic_structures import Position, TextDocumentIdentifier
+from pygls.lsp.types.basic_structures import Location, Position, TextDocumentIdentifier
 from pygls.lsp.types.language_features import HoverParams, DefinitionParams
 
 import pytest
@@ -7,7 +7,7 @@ from mock import Mock
 from pygls.lsp.types import TextDocumentIdentifier
 from pygls.workspace import Document, Workspace
 
-from ...server import completions, hover, goto_definition
+from server.server import completions, hover, goto_definition
 
 
 class FakeServer():
@@ -27,7 +27,8 @@ fake_document = Document(fake_document_uri, fake_document_content)
 fake_hoverParams = HoverParams(text_document=fake_doc_identifier,
                                position=Position(line=2, character=1))
 fake_defParams = DefinitionParams(text_document=fake_doc_identifier,
-                                  position=Position(line=1, character=8))
+
+                                  position=Position(line=1, character=9))
 
 
 server = FakeServer()
@@ -52,13 +53,14 @@ def test_completions():
     assert 'notes' in labels
 
 
-def test_hover(server, fake_hoverParams):
+def test_hover(server=server, fake_hoverParams=fake_hoverParams):
     result = hover(server, fake_hoverParams)
-    docstring = result.contents
+    docstring = result.contents.value
     assert '## Syntax\n\n`sort`' in docstring
 
 
-def test_goto_definition(server, fake_defParams):
+def test_goto_definition(server=server, fake_defParams=fake_defParams):
     result = goto_definition(server, fake_defParams)
+    assert isinstance(result, Location)
     assert 0 == result.range.start.line
     assert 4 == result.range.start.character

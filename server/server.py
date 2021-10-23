@@ -56,7 +56,7 @@ def goto_definition(ls, params: DefinitionParams):
 
     if origin_line > 0:
         searched_area = document.lines
-        for i in range(origin_pos.line - 1, 0, -1):
+        for i in range(origin_pos.line - 1, -1, -1):
             matchObj = re.match(genPattern, searched_area[i])
             if matchObj and matchObj.group(5) == origin_varname:
                 targetLine = i

@@ -13,14 +13,18 @@ BLOCK_COMMENTS_BG = re.compile(r'(.*?)/\*.*')
 BLOCK_COMMENTS_END = re.compiel(r'.*\*/(.*)')
 INLINE_COMMENTS = frozenset(['//'])
 INLINE_COMM_RE = re.compile(r'(.*)//.*')
-STRING = re.compile(r'(")\w*(")')
+STRING = re.compile(r'".*?"')
 
+# idea: operator, comma: 直接写匹配bad style的正则
 
 OPERATOR_REGEX = re.compile(r'(?:[^,\s])(\s*)(?:[-+*/|!<=>%&^]+)(\s*)')
 # 1.不以, wh开头；2.任意空白符；3.运算符号；4.任意空白符
-WHITESPACE_AFTER_COMMA_REGEX = re.compile(r'[,;:](\s*)')
+WHITESPACE_AFTER_COMMA_REGEX = re.compile(r'[,:](\s*)')
 LOOP_START = re.compile(r'(^\s*)(?:foreach|forvalue).*\{')
-LOOP_END = re.compile(r'(^\s*)\}')
+LOOP_END = re.compile(r'(^\s*)\}\s*')
+INDENT_REGEX = re.compile(r'([ \t]*).+')
+EXTRANEOUS_WHITESPACE_REGEX = re.compile(r'[\[({] | [\]}),;]| :(?!=)')
+
 """
 //: r'//[^\n]*'
 /* */: r'/\*' -> r'(\\*/\\s+\\*[^\\n]*)|(\\*/(?!\\*))'
@@ -33,28 +37,7 @@ ForLoop:
 Operators: =, ==
 """
 
-INDENT_REGEX = re.compile(r'([ \t]*)')
-EXTRANEOUS_WHITESPACE_REGEX = re.compile(r'[\[({] | [\]}),;]| :(?!=)')
-STARTSWITH_INDENT_STATEMENT_REGEX = re.compile(
-    r'^\s*({0})\b'.format('|'.join(s.replace(' ', r'\s+') for s in (
-        'forvalue', 'foreach',
-    )))
-)
-
 text = "gen x = 1  // generate variable\n// this is a comment"
-
-
-def _is_one_line(lines, line_idx):
-    """
-        Check if a physical line is a logical independent line
-        of previous line.
-        Logical independent Line:
-        1. Not in comment block
-        2. Not ends up with '///'
-        Return: is_one_line: Bool,
-                is_end: Bool,
-    """
-    pass
 
 
 def _parseText(text: str) -> SemanticTokens:

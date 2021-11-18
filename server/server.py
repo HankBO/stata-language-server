@@ -16,7 +16,8 @@ from pygls.lsp.types import (CompletionList, CompletionParams, Location, Definit
                              SemanticTokensClientCapabilities, PublishDiagnosticsParams)
 from server.semantics import (INLINE_COMMENTS, BLOCK_COMMENTS, OPERATOR_REGEX, STRING, STAR_COMMENTS,
                               WHITESPACE_AFTER_COMMA_REGEX, OPERATOR_REGEX, BLOCK_COMMENTS_BG,
-                              BLOCK_COMMENTS_END, INLINE_COMM_RE)
+                              BLOCK_COMMENTS_END, INLINE_COMM_RE, LOOP_START, LOOP_END, INDENT_REGEX)
+
 
 class StataLanguageServer(LanguageServer):
     CMD_REGISTER_COMPLETIONS = 'registerCompletions'
@@ -138,16 +139,6 @@ def semantic_tokens(ls: StataLanguageServer, params: SemanticTokensParams):
     return SemanticTokens(data=data)
 
 
-def line_parser(line: int, extra: dict):
-    """
-        line, extra={"isInComment": False, "isInBrackets": False, "loopLevel": 0}
-        commentStack = ['/*', '*/'], braketStack = ['(', ')'], loopStack['{', '}'] 
-    """
-    isInComment  = False
-    if isInComment:
-        return None
-
-
 def create_diagnostic(line: int, stIndex: int, enIndex: int,
                       msg: str, severity: DiagnosticSeverity) -> Diagnostic:
     """Create a Diagnostic"""
@@ -163,6 +154,16 @@ def create_diagnostic(line: int, stIndex: int, enIndex: int,
     return diag
 
 
+def inSkipTokens(start, end, skip_tokens: list) -> bool:
+    """
+        Check if start and end index(python) is in one of skip tokens
+    """
+    for token in skip_tokens:
+        if start >= token[0] and end <= token[1]:
+            return True
+    return False
+
+
 @stata_server.feature(TEXT_DOCUMENT_PUBLISH_DIAGNOSTICS)
 def refresh_diagnostics(ls: StataLanguageServer, params: PublishDiagnosticsParams):
     uri = ls.workspace.get_document(params.text_document.uri).uri
@@ -170,63 +171,86 @@ def refresh_diagnostics(ls: StataLanguageServer, params: PublishDiagnosticsParam
 
     diagnostics = []
     severity = DiagnosticSeverity.Warning
-    message = "Bad Codestyle!"
+    message = "Hello, user!"
 
-    LINE_STATE = {"isInComm": False, "bracStack": [], "loopStack": []}  # cross line state
+    LINE_STATE = {"isInComm": False, "loopLevel": 0}  # cross line state
     for lineno, line in enumerate(doc.lines):
-        rest = {"str": line, "start": 0, "end": len(line)}
+        skip_tokens = []
         # Star Comments
-        if STAR_COMMENTS.findall(rest["str"]):
+        if re.match(STAR_COMMENTS, line):
             continue
         # Comment block
+        # 0 ... [Comm: x, x] ..., [Str: x, x] ... len
         if LINE_STATE['isInComm'] is False:
-            match = BLOCK_COMMENTS_BG.findall(rest["str"])
-            if len(match) == 0:
+            match = re.match(BLOCK_COMMENTS_BG, line)
+            if match is None:
                 pass
-            elif match[0] == '':
+            elif match.group(1) == '':
                 LINE_STATE['isInComm'] = True
                 continue
             else:
                 LINE_STATE['isInComm'] = True
-                start, end = match.span()
-                rest.update({"str": match[0],
-                             "start": start,
-                             "end": end})
+                start, end = match.start(1), match.end(1)  # python index
+                skip_tokens.append([start, end])
         else:
-            match = BLOCK_COMMENTS_END.findall(rest["str"])
-            if len(match) == 0:
+            match = re.match(BLOCK_COMMENTS_END, line)
+            if match is None:
                 continue
-            elif match[0] == '':
+            elif match.group(1) == '':
                 LINE_STATE['isInComm'] = False
                 continue
             else:
                 LINE_STATE['isInComm'] = False
-                rest.update({"str": match[0],
-                             "start": start,
-                             "end": end})
+                start, end = match.start(1), match.end(1)
+                skip_tokens.append([start, end])
 
-        # Inline Comment, index offset maybe???
-        match = INLINE_COMM_RE.findall(rest["str"])
-        if match:
-            
-        # STRING: 
+        # Inline Comment
+        match = re.match(INLINE_COMM_RE, line)
+        if match and match.group(1) == '':
+            continue
+        elif match and match.group(1) != '':
+            start, end = match.start(1), match.end(1)
+            skip_tokens.append([start, end])
 
-        # Operator
-
+        # STRING
+        for match in STRING.finditer(line):
+            start, end = match.span()
+            if not inSkipTokens(start, end, skip_tokens):
+                skip_tokens.append([start, end])
 
         # Operator Checker
-
-        # Comma
+        for match in OPERATOR_REGEX.finditer(line):
+            for sindex in range(1, 3):
+                start, end = match.start(sindex), match.end(sindex)
+                if not inSkipTokens(start, end, skip_tokens):
+                    if end - start != 1:
+                        message = "whitespace around operator should be 1"
+                        diagnostics.append(
+                            create_diagnostic(lineno, start + 1, end, message, severity))
 
         # Comma Checker
-
-        # Loop Indent
+        for match in WHITESPACE_AFTER_COMMA_REGEX.finditer(line):
+            start, end = match.start(1), match.end(1)
+            if not inSkipTokens(start, end, skip_tokens):
+                if end - start != 1:
+                    message = "1 whitespace after ','"
+                    diagnostics.append(
+                            create_diagnostic(lineno, start + 1, end, message, severity))
 
         # Loop Indent Checker
-        
-        for match in OPERATOR_REGEX.finditer(line):
-            start, end = match.span()
-            diagnostics.append(create_diagnostic(lineno, start, end, message, severity))
+        if re.match(LOOP_END, line) and LINE_STATE['loopLevel'] > 0:
+            LINE_STATE['loopLevel'] -= 1
+
+        INDENT_SPACE = 4
+        match = re.match(INDENT_REGEX, line)
+        start, end = match.start(1), match.end(1)
+        actual_space = end - start
+        if actual_space != LINE_STATE['loopLevel'] * INDENT_SPACE:
+            message = "inappropriate indented line"
+            diagnostics.append(create_diagnostic(lineno, start + 1, end, message, severity))
+
+        if re.match(LOOP_START, line):
+            LINE_STATE['loopLevel'] += 1
 
     ls.publish_diagnostics(doc_uri=uri, diagnostics=diagnostics)
 

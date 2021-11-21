@@ -1,8 +1,8 @@
 from abc import get_cache_token
 from typing import Optional
-from pygls.lsp.types.basic_structures import Location, Position, TextDocumentIdentifier
+from pygls.lsp.types.basic_structures import Location, Position, TextDocumentIdentifier, TextDocumentItem
 from pygls.lsp.types.language_features import HoverParams, DefinitionParams
-
+from pygls.lsp.types.workspace import DidOpenTextDocumentParams
 import pytest
 from mock import Mock
 from pygls.lsp.types import TextDocumentIdentifier
@@ -24,7 +24,7 @@ class FakeServer():
 
 
 fake_document_uri = 'file://fake_dofile.do'
-fake_document_content = 'gen x = 3\nreplace x = 10\nsort x'
+fake_document_content = 'gen x = 3\nreplace x =10\nsort x'
 fake_doc_identifier = TextDocumentIdentifier(uri=fake_document_uri)
 fake_document = Document(fake_document_uri, fake_document_content)
 fake_hoverParams = HoverParams(text_document=fake_doc_identifier,
@@ -32,6 +32,13 @@ fake_hoverParams = HoverParams(text_document=fake_doc_identifier,
 fake_defParams = DefinitionParams(text_document=fake_doc_identifier,
 
                                   position=Position(line=1, character=9))
+fake_diagParams = DidOpenTextDocumentParams(
+                  text_document=TextDocumentItem(
+                        uri=fake_document_uri,
+                        language_id='stata',
+                        version='13',
+                        text=fake_document_content
+                  ))
 
 
 server = FakeServer()
@@ -70,5 +77,11 @@ def test_goto_definition(server=server, fake_defParams=fake_defParams):
     assert 4 == result.range.start.character
 
 
-def test_refresh_diagnostics(server=server):
-    pass
+def test_refresh_diagnostics(server=server, fake_diagParams=fake_diagParams):
+    _reset_mocks()
+    expected_msg = "whitespace around operator should be 1"
+    
+    refresh_diagnostics(server, fake_diagParams)
+
+    args = server.publish_diagnostics.call_args
+    assert args[1]['diagnostics'][0].message == expected_msg

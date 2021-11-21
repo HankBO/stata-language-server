@@ -1,4 +1,6 @@
 import uuid
+
+from pygls.protocol import LanguageServerProtocol
 import server.utils as utils
 from pygls.lsp.types.basic_structures import Diagnostic, DiagnosticSeverity
 from pygls.lsp.types.workspace import (ConfigurationItem, ConfigurationParams,
@@ -24,6 +26,15 @@ from server.constants import (MAX_LINE_LENGTH_MESSAGE, OPERATOR_REGEX, STRING, S
 COMLIST = utils.getComList()  # TODO: Optimize IO speed
 
 
+class StataLanguageServerProtocol(LanguageServerProtocol):
+    """
+        Override some build-in fuctions.
+        #TODO: Conditionally register fuction to features based on configures.
+    """
+    def __init__(self):
+        super().__init__()
+
+
 class StataLanguageServer(LanguageServer):
     CMD_REGISTER_COMPLETIONS = 'registerCompletions'
     CMD_REGISTER_HOVER = 'registerHover'
@@ -35,7 +46,7 @@ class StataLanguageServer(LanguageServer):
 
     CONFIGURATION_SECTION = 'stataServer'
 
-    def __init__(self):
+    def __init__(self, protocol_cls=StataLanguageServerProtocol):
         super().__init__()
 
 

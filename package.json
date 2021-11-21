@@ -1,12 +1,13 @@
 {
   "name": "stata-language-server",
-  "description": "Simple Stata Syntaxlint",
+  "displayName": "StataLanguageServer",
+  "description": "Simple Language Server for Stata in VS Code",
   "icon": "assets/img/icon.png",
-  "author": "Hai Bo",
+  "author": "HaiBo",
   "repository": "https://github.com/HankBO/stata-language-server",
   "license": "MIT",
-  "version": "1.0.0",
-  "publisher": "Hai Bo",
+  "version": "0.9.0",
+  "publisher": "HaiBo",
   "engines": {
     "vscode": "^1.55.0"
   },
@@ -24,21 +25,6 @@
         "type": "object",
         "title": "Stata Server Configuration",
         "properties": {
-          "stataServer.useCompletion": {
-            "type": "boolean",
-            "default": "true",
-            "description": "Activate command completion, default as true."
-          },
-          "stataServer.useDocstring": {
-            "type": "boolean",
-            "default": "true",
-            "description": "Show Docstring when hovering, default as true."
-          },
-          "stataServer.useStyleChecking": {
-            "type": "boolean",
-            "default": "true",
-            "description": "Activate codestyle checking, default as true."
-          },
           "stataServer.setMaxLineLength": {
             "type": "number",
             "minimum": "1",
@@ -61,7 +47,9 @@
   "scripts": {
     "vscode:prepublish": "npm run compile",
     "compile": "tsc -b",
-    "watch": "tsc -b -w"
+    "build": "vsce",
+    "watch": "tsc -b -w",
+    "postinstall": "cd client && npm install && cd .."
   },
   "devDependencies": {
     "@types/node": "^14.14.41",

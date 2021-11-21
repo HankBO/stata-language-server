@@ -20,8 +20,44 @@
 
 import * as net from "net";
 import * as path from "path";
-import { ExtensionContext, ExtensionMode, workspace } from "vscode";
+import { ExtensionContext, ExtensionMode, workspace, window } from "vscode";
 import { LanguageClient, LanguageClientOptions, ServerOptions } from "vscode-languageclient/node";
+import * as child_process from "child_process";
+
+/**
+ * Check if pygls is already installed on this python.
+ *
+ * @param python path of the python interpreter
+ */
+ function ispyglsInstalled(python: string): boolean {
+  try {
+    child_process.execFileSync(python, ["-c", "import pygls"]);
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+/**
+ * Check if python version looks supported.
+ *
+ * @param python path of the python interpreter
+ */
+ function isPythonVersionCompatible(python: string): boolean {
+  try {
+    child_process.execFileSync(python, [
+      "-c",
+      "import sys; sys.exit(sys.version_info[:2] < (3, 6))"
+    ]);
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+async function shortDelay() {
+  return new Promise(resolve => setTimeout(resolve, 1000));
+}
 
 let client: LanguageClient;
 
@@ -68,7 +104,7 @@ function startLangServer(
   return new LanguageClient(command, serverOptions, getClientOptions());
 }
 
-export function activate(context: ExtensionContext): void {
+export async function activate(context: ExtensionContext): Promise<void> {
   if (context.extensionMode === ExtensionMode.Development) {
     // Development - Run the server manually
     client = startLangServerTCP(2087);
@@ -82,6 +118,38 @@ export function activate(context: ExtensionContext): void {
     }
 
     client = startLangServer(pythonPath, ["-m", "server"], cwd);
+
+    if (!isPythonVersionCompatible("python3")) {
+      window.showErrorMessage(
+        "Stata Language Server: Invalid python version, needs python >= 3.6"
+      );
+      return;
+    }
+
+    let setupSucceed = ispyglsInstalled("python3");
+    if (!setupSucceed) {
+      const terminal = window.createTerminal("stata-ls");
+      terminal.show(false);
+      terminal.sendText(
+        "# Install pygls on selected python.\n"
+      );
+      terminal.sendText(
+        `python3 -m pip install pygls --user`
+      );
+      for (let retries = 0; retries < 3; retries++) {
+        await shortDelay();
+        setupSucceed = ispyglsInstalled("python3");
+      }
+      if (setupSucceed) {
+        window.showInformationMessage(
+          "Stata Language Server: pygls installed"
+        );
+      } else {
+        window.showErrorMessage(
+          "Stata Language Server: Could not install pygls"
+        );
+      }
+    }
   }
 
   context.subscriptions.push(client.start());

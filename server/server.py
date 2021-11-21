@@ -8,7 +8,7 @@ from pygls.lsp.types.workspace import (ConfigurationItem, ConfigurationParams,
 from typing import Optional
 import re
 from pygls.lsp.methods import (COMPLETION, HOVER, DEFINITION, TEXT_DOCUMENT_DID_CHANGE,
-                               TEXT_DOCUMENT_DID_CLOSE, TEXT_DOCUMENT_SEMANTIC_TOKENS_FULL,
+                               TEXT_DOCUMENT_DID_CLOSE,
                                TEXT_DOCUMENT_PUBLISH_DIAGNOSTICS, TEXT_DOCUMENT_DID_OPEN,
                                WORKSPACE_CONFIGURATION)
 from pygls.server import LanguageServer

@@ -21,7 +21,7 @@ OPERATOR_REGEX = re.compile(r'(?:[^,\s])(\s*)(?:[-+*/|!<=>%&^]+)(\s*)')
 WHITESPACE_AFTER_COMMA_REGEX = re.compile(r'[,:](\s*)')
 LOOP_START = re.compile(r'(^\s*)(?:foreach|forvalue).*\{')
 LOOP_END = re.compile(r'(^\s*)\}\s*')
-INDENT_REGEX = re.compile(r'([ \t]*).+')
+INDENT_REGEX = re.compile(r'([ \t]*).*')
 EXTRANEOUS_WHITESPACE_REGEX = re.compile(r'[\[({] | [\]}),;]| :(?!=)')
 
 # Diagnostic Messages

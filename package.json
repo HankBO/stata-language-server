@@ -3,11 +3,11 @@
   "displayName": "StataLanguageServer",
   "description": "Simple Language Server for Stata in VS Code",
   "icon": "assets/img/icon.png",
-  "author": "HaiBo",
+  "author": "Hai Bo",
   "repository": "https://github.com/HankBO/stata-language-server",
   "license": "MIT",
-  "version": "0.9.0",
-  "publisher": "HaiBo",
+  "version": "0.2.0",
+  "publisher": "Hai Bo",
   "engines": {
     "vscode": "^1.55.0"
   },
@@ -20,6 +20,21 @@
     "onLanguage:stata"
   ],
   "contributes": {
+    "languages": [
+      {
+				"id": "stata",
+				"aliases": [
+					"Stata Enhanced",
+					"Stata",
+					"stata"
+				],
+				"extensions": [
+					".do",
+					".ado",
+					".mata"
+				]
+			}
+    ],
     "configuration": [
       {
         "type": "object",

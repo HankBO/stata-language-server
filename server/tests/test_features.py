@@ -1,3 +1,4 @@
+from abc import get_cache_token
 from typing import Optional
 from pygls.lsp.types.basic_structures import Location, Position, TextDocumentIdentifier
 from pygls.lsp.types.language_features import HoverParams, DefinitionParams
@@ -7,7 +8,8 @@ from mock import Mock
 from pygls.lsp.types import TextDocumentIdentifier
 from pygls.workspace import Document, Workspace
 
-from server.server import completions, hover, goto_definition
+from server.server import (completions, get_configuration_callback, hover, goto_definition,
+                           refresh_diagnostics)
 
 
 class FakeServer():
@@ -15,6 +17,7 @@ class FakeServer():
     publish_diagnostics = None
     show_message = None
     show_message_log = None
+    get_configuration = None
 
     def __init__(self):
         self.workspace = Workspace('', None)
@@ -35,6 +38,7 @@ server = FakeServer()
 server.publish_diagnostics = Mock()
 server.show_message = Mock()
 server.show_message_log = Mock()
+server.get_configuration = Mock()
 server.workspace.get_document = Mock(return_value=fake_document)
 
 
@@ -64,3 +68,7 @@ def test_goto_definition(server=server, fake_defParams=fake_defParams):
     assert isinstance(result, Location)
     assert 0 == result.range.start.line
     assert 4 == result.range.start.character
+
+
+def test_refresh_diagnostics(server=server):
+    pass

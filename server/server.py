@@ -1,33 +1,39 @@
 import uuid
-import utils
+import server.utils as utils
 from pygls.lsp.types.basic_structures import Diagnostic, DiagnosticSeverity
-from pygls.lsp.types.workspace import DidChangeTextDocumentParams, DidCloseTextDocumentParams, DidOpenTextDocumentParams
+from pygls.lsp.types.workspace import (ConfigurationItem, ConfigurationParams,
+     DidChangeTextDocumentParams, DidCloseTextDocumentParams, DidOpenTextDocumentParams)
 from typing import Optional
 import re
-
 from pygls.lsp.methods import (COMPLETION, HOVER, DEFINITION, TEXT_DOCUMENT_DID_CHANGE,
                                TEXT_DOCUMENT_DID_CLOSE, TEXT_DOCUMENT_SEMANTIC_TOKENS_FULL,
-                               TEXT_DOCUMENT_PUBLISH_DIAGNOSTICS, TEXT_DOCUMENT_DID_OPEN)
+                               TEXT_DOCUMENT_PUBLISH_DIAGNOSTICS, TEXT_DOCUMENT_DID_OPEN,
+                               WORKSPACE_CONFIGURATION)
 from pygls.server import LanguageServer
 from pygls.lsp.types import (CompletionList, CompletionParams, Location, DefinitionParams,
                              Hover, HoverParams, MessageType, Position, Range, Registration,
                              RegistrationParams, Unregistration, UnregistrationParams,
-                             SemanticTokens, SemanticTokensLegend, SemanticTokensParams,
-                             SemanticTokensClientCapabilities, PublishDiagnosticsParams)
-from server.semantics import (INLINE_COMMENTS, BLOCK_COMMENTS, OPERATOR_REGEX, STRING, STAR_COMMENTS,
+                             PublishDiagnosticsParams)
+from server.constants import (MAX_LINE_LENGTH_MESSAGE, OPERATOR_REGEX, STRING, STAR_COMMENTS,
                               WHITESPACE_AFTER_COMMA_REGEX, OPERATOR_REGEX, BLOCK_COMMENTS_BG,
-                              BLOCK_COMMENTS_END, INLINE_COMM_RE, LOOP_START, LOOP_END, INDENT_REGEX)
+                              BLOCK_COMMENTS_END, INLINE_COMM_RE, LOOP_START, LOOP_END, INDENT_REGEX,
+                              OP_WHITESPACE_MESSAGE, COMMA_WHITESPACE_MESSAGE, INAP_INDENT_MESSAGE,
+                              MAX_LINE_LENGTH_SEVERITY, MAX_LINE_LENGTH, INDENT_SPACE,
+                              OP_WHITESPACE_SEVERITY, COMMA_WHITESPACE_SEVERITY, INAP_INDENT_SEVERITY,
+                              USECOMPLETION, USEDOCSTRING, USESTYLECHECKING)
+COMLIST = utils.getComList()  # TODO: Optimize IO speed
 
 
 class StataLanguageServer(LanguageServer):
     CMD_REGISTER_COMPLETIONS = 'registerCompletions'
     CMD_REGISTER_HOVER = 'registerHover'
     CMD_REGISTER_DEFINITION = 'registerDefinition'
-    CMD_REGISTER_DIAGNOSTICS = 'registerDiagnostics'
+    CMD_GET_CONFIGURATION_CALLBACK = 'getConfigurationCallback'
     CMD_UNREGISTER_COMPLETIONS = 'unregisterCompletions'
     CMD_UNREGISTER_HOVER = 'unregisterHover'
     CMD_UNREGISTER_DEFINITION = 'unregisterDefinition'
-    CMD_UNREGISTER_DIAGNOSTICS = 'unregisterDiagnostics'
+
+    CONFIGURATION_SECTION = 'stataServer'
 
     def __init__(self):
         super().__init__()
@@ -45,16 +51,15 @@ def did_change(ls, params: DidChangeTextDocumentParams):
 @stata_server.feature(TEXT_DOCUMENT_DID_CLOSE)
 def did_close(server: StataLanguageServer, params: DidCloseTextDocumentParams):
     """Text document did close notification."""
-    server.show_message('Text Document Did Close')
+    server.show_message_log('Do File Did Close')
 
 
 @stata_server.feature(TEXT_DOCUMENT_DID_OPEN)
 async def did_open(ls, params: DidOpenTextDocumentParams):
     """Text document did open notification."""
-    ls.show_message('Text Document Did Open')
+    ls.show_message_log('Do File Did Open')
+    get_configuration_callback(ls)
     refresh_diagnostics(ls, params)
-
-COMLIST = utils.getComList()  # TODO: Optimize IO speed
 
 
 @stata_server.feature(COMPLETION)
@@ -100,45 +105,6 @@ def goto_definition(ls, params: DefinitionParams):
     return None
 
 
-@stata_server.feature(
-    TEXT_DOCUMENT_SEMANTIC_TOKENS_FULL,
-    SemanticTokensLegend(
-        token_types=["operator"],
-        token_modifiers=[]
-    )
-)
-def semantic_tokens(ls: StataLanguageServer, params: SemanticTokensParams):
-    """
-        Resolve text as tokens.
-    """
-    OPERATOR_REGEX = re.compile(r'(?:[^,\s])(\s*)(?:[-+*/|!<=>%&^]+)(\s*)')
-    uri = params.text_document.uri
-    doc = ls.workspace.get_document(uri)
-
-    last_line = 0
-    last_start = 0
-
-    data = []
-
-    for lineno, line in enumerate(doc.lines):
-        last_start = 0
-
-        for match in OPERATOR_REGEX.finditer(line):
-            start, end = match.span()
-            data += [
-                (lineno - last_line),
-                (start - last_start),
-                (end - start),
-                0,
-                0
-            ]
-
-            last_line = lineno
-            last_start = start
-
-    return SemanticTokens(data=data)
-
-
 def create_diagnostic(line: int, stIndex: int, enIndex: int,
                       msg: str, severity: DiagnosticSeverity) -> Diagnostic:
     """Create a Diagnostic"""
@@ -165,22 +131,24 @@ def inSkipTokens(start, end, skip_tokens: list) -> bool:
 
 
 @stata_server.feature(TEXT_DOCUMENT_PUBLISH_DIAGNOSTICS)
-def refresh_diagnostics(ls: StataLanguageServer, params: PublishDiagnosticsParams):
+def refresh_diagnostics(ls: StataLanguageServer, params):
+    """
+        Codestyle checking and publish diagnostics.
+    """
     uri = ls.workspace.get_document(params.text_document.uri).uri
     doc = ls.workspace.get_document(uri)
-
     diagnostics = []
-    severity = DiagnosticSeverity.Warning
-    message = "Hello, user!"
 
     LINE_STATE = {"isInComm": False, "loopLevel": 0}  # cross line state
     for lineno, line in enumerate(doc.lines):
+        # Max line length
+        if len(line) > MAX_LINE_LENGTH:
+            diagnostics.append(create_diagnostic(lineno, MAX_LINE_LENGTH, MAX_LINE_LENGTH, MAX_LINE_LENGTH_MESSAGE, MAX_LINE_LENGTH_SEVERITY))
         skip_tokens = []
         # Star Comments
         if re.match(STAR_COMMENTS, line):
             continue
         # Comment block
-        # 0 ... [Comm: x, x] ..., [Str: x, x] ... len
         if LINE_STATE['isInComm'] is False:
             match = re.match(BLOCK_COMMENTS_BG, line)
             if match is None:
@@ -206,9 +174,7 @@ def refresh_diagnostics(ls: StataLanguageServer, params: PublishDiagnosticsParam
 
         # Inline Comment
         match = re.match(INLINE_COMM_RE, line)
-        if match and match.group(1) == '':
-            continue
-        elif match and match.group(1) != '':
+        if match and match.group(1) != '':
             start, end = match.start(1), match.end(1)
             skip_tokens.append([start, end])
 
@@ -224,30 +190,27 @@ def refresh_diagnostics(ls: StataLanguageServer, params: PublishDiagnosticsParam
                 start, end = match.start(sindex), match.end(sindex)
                 if not inSkipTokens(start, end, skip_tokens):
                     if end - start != 1:
-                        message = "whitespace around operator should be 1"
                         diagnostics.append(
-                            create_diagnostic(lineno, start + 1, end, message, severity))
+                            create_diagnostic(lineno, end, end, OP_WHITESPACE_MESSAGE, OP_WHITESPACE_SEVERITY))
 
         # Comma Checker
         for match in WHITESPACE_AFTER_COMMA_REGEX.finditer(line):
             start, end = match.start(1), match.end(1)
             if not inSkipTokens(start, end, skip_tokens):
                 if end - start != 1:
-                    message = "1 whitespace after ','"
                     diagnostics.append(
-                            create_diagnostic(lineno, start + 1, end, message, severity))
+                            create_diagnostic(lineno, end, end, COMMA_WHITESPACE_MESSAGE, COMMA_WHITESPACE_SEVERITY))
 
         # Loop Indent Checker
         if re.match(LOOP_END, line) and LINE_STATE['loopLevel'] > 0:
             LINE_STATE['loopLevel'] -= 1
 
-        INDENT_SPACE = 4
         match = re.match(INDENT_REGEX, line)
-        start, end = match.start(1), match.end(1)
-        actual_space = end - start
-        if actual_space != LINE_STATE['loopLevel'] * INDENT_SPACE:
-            message = "inappropriate indented line"
-            diagnostics.append(create_diagnostic(lineno, start + 1, end, message, severity))
+        if match:
+            start, end = match.start(1), match.end(1)
+            actual_space = end - start
+            if actual_space != LINE_STATE['loopLevel'] * INDENT_SPACE:
+                diagnostics.append(create_diagnostic(lineno, end, end, INAP_INDENT_MESSAGE, INAP_INDENT_SEVERITY))
 
         if re.match(LOOP_START, line):
             LINE_STATE['loopLevel'] += 1
@@ -255,18 +218,37 @@ def refresh_diagnostics(ls: StataLanguageServer, params: PublishDiagnosticsParam
     ls.publish_diagnostics(doc_uri=uri, diagnostics=diagnostics)
 
 
+@stata_server.command(StataLanguageServer.CMD_GET_CONFIGURATION_CALLBACK)
+def get_configuration_callback(ls: StataLanguageServer, *args):
+    def _config_callback(config):
+        global MAX_LINE_LENGTH, INDENT_SPACE, USECOMPLETION, USEDOCSTRING, USESTYLECHECKING
+        try:
+            MAX_LINE_LENGTH = int(eval(config[0].get('setMaxLineLength')))
+            INDENT_SPACE = int(eval(config[0].get('setIndentSpace')))
+            USECOMPLETION = utils.convertJsonBool(config[0].get('useCompletion'))
+            USEDOCSTRING = utils.convertJsonBool(config[0].get('useDocstring'))
+            USESTYLECHECKING = utils.convertJsonBool(config[0].get('useStyleChecking'))
+        except Exception as e:
+            ls.show_message_log(f'Error ocurred: {e}')        
+    ls.get_configuration(ConfigurationParams(items=[
+        ConfigurationItem(
+            scope_uri='',
+            section=StataLanguageServer.CONFIGURATION_SECTION
+        )
+    ]), _config_callback)
+
+
 @stata_server.command(StataLanguageServer.CMD_REGISTER_COMPLETIONS)
 async def register_completions(ls: StataLanguageServer, *args):
     """Register completions method on the client."""
-    params = RegistrationParams(registrations=[
-                Registration(
+    params = RegistrationParams(registrations=[Registration(
                     id=str(uuid.uuid4()),
                     method=COMPLETION,)])
     response = await ls.register_capability_async(params)
     if response is None:
-        ls.show_message('Successfully registered completions method')
+        ls.show_message_log('Successfully registered completions method')
     else:
-        ls.show_message('Error happened during completions registration.',
+        ls.show_message_log('Error happened during completions registration.',
                         MessageType.Error)
 
 
@@ -276,9 +258,9 @@ async def unregister_completions(ls: StataLanguageServer, *args):
     params = UnregistrationParams(unregistrations=[Unregistration(id=str(uuid.uuid4()), method=COMPLETION)])
     response = await ls.unregister_capability_async(params)
     if response is None:
-        ls.show_message('Successfully unregistered completions method')
+        ls.show_message_log('Successfully unregistered completions method')
     else:
-        ls.show_message('Error happened during completions unregistration.',
+        ls.show_message_log('Error happened during completions unregistration.',
                         MessageType.Error)
 
 
@@ -288,9 +270,9 @@ async def register_hover(ls: StataLanguageServer, *args):
     params = RegistrationParams(registrations=[Registration(id=str(uuid.uuid4()), method=HOVER)])
     response = await ls.register_capability_async(params)
     if response is None:
-        ls.show_message('Successfully registered hover method')
+        ls.show_message_log('Successfully registered hover method')
     else:
-        ls.show_message('Error happened during hover registration.',
+        ls.show_message_log('Error happened during hover registration.',
                         MessageType.Error)
 
 
@@ -300,9 +282,9 @@ async def unregister_hover(ls: StataLanguageServer, *args):
     params = UnregistrationParams(unregistrations=[Unregistration(id=str(uuid.uuid4()), method=HOVER)])
     response = await ls.unregister_capability_async(params)
     if response is None:
-        ls.show_message('Successfully unregistered hover method')
+        ls.show_message_log('Successfully unregistered hover method')
     else:
-        ls.show_message('Error happened during hover unregistration.',
+        ls.show_message_log('Error happened during hover unregistration.',
                         MessageType.Error)
 
 
@@ -313,9 +295,9 @@ async def register_definition(ls: StataLanguageServer, *args):
                                                             method=DEFINITION)])
     response = await ls.register_capability_async(params)
     if response is None:
-        ls.show_message('Successfully registered definition method')
+        ls.show_message_log('Successfully registered definition method')
     else:
-        ls.show_message('Error happened during definition registration.',
+        ls.show_message_log('Error happened during definition registration.',
                         MessageType.Error)
 
 
@@ -326,21 +308,7 @@ async def unregister_definition(ls: StataLanguageServer, *args):
                                                                   method=DEFINITION)])
     response = await ls.unregister_capability_async(params)
     if response is None:
-        ls.show_message('Successfully unregistered definition method')
+        ls.show_message_log('Successfully unregistered definition method')
     else:
-        ls.show_message('Error happened during definition unregistration.',
+        ls.show_message_log('Error happened during definition unregistration.',
                         MessageType.Error)
-
-"""
-@stata_server.command(StataLanguageServer.CMD_REGISTER_DIAGNOSTICS)
-async def register_diagnostics(ls: StataLanguageServer, *args):
-
-    params = RegistrationParams(registrations=[Registration(id=str(uuid.uuid4()),
-                                                            method=TEXT_DOCUMENT_PUBLISH_DIAGNOSTICS)])
-    response = await ls.register_capability_async(params)
-    if response is None:
-        ls.show_message('Successfully registered diagnostics method')
-    else:
-        ls.show_message('Error happened during diagnostics registration.',
-                        MessageType.Error)
-"""

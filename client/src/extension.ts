@@ -20,7 +20,7 @@
 
 import * as net from "net";
 import * as path from "path";
-import { ExtensionContext, workspace } from "vscode";
+import { ExtensionContext, ExtensionMode, workspace } from "vscode";
 import { LanguageClient, LanguageClientOptions, ServerOptions } from "vscode-languageclient/node";
 
 let client: LanguageClient;
@@ -40,13 +40,9 @@ function getClientOptions(): LanguageClientOptions {
   };
 }
 
-function isStartedInDebugMode(): boolean {
-  return process.env.VSCODE_DEBUG_MODE === "true";
-}
-
 function startLangServerTCP(addr: number): LanguageClient {
   const serverOptions: ServerOptions = () => {
-    return new Promise((resolve, reject) => {
+    return new Promise((resolve /*, reject */) => {
       const clientSocket = new net.Socket();
       clientSocket.connect(addr, "127.0.0.1", () => {
         resolve({
@@ -72,8 +68,8 @@ function startLangServer(
   return new LanguageClient(command, serverOptions, getClientOptions());
 }
 
-export function activate(context: ExtensionContext) {
-  if (isStartedInDebugMode()) {
+export function activate(context: ExtensionContext): void {
+  if (context.extensionMode === ExtensionMode.Development) {
     // Development - Run the server manually
     client = startLangServerTCP(2087);
   } else {

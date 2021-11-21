@@ -31,7 +31,7 @@ Only Paragraph `Syntax` in a help-file will be showed while hovering.
 
 ## Install Server Dependencies
 
-- [pygls](https://github.com/openlawlibrary/pygls)(0.11.2)
+- [pygls](https://github.com/openlawlibrary/pygls)(0.11.3)
 
     `pip3 install pygls`
 
@@ -39,9 +39,9 @@ Only Paragraph `Syntax` in a help-file will be showed while hovering.
 
 Following Features will be implemented:
 
-- [ ] Codestyle diagnostics
-- [ ] Docstring IO optimization, less file size
-- [ ] Brief commands completion(like `forval`)
+- [x] Codestyle diagnostics
+- [ ] IO optimization for Docstring and Command Tips, less file size
+- [ ] Add Option: keybinding for users to activate Docstring and Command Tips
 
 ## Resources Referenced
 

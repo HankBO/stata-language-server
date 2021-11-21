@@ -56,7 +56,7 @@ import * as child_process from "child_process";
 }
 
 async function shortDelay() {
-  return new Promise(resolve => setTimeout(resolve, 1000));
+  return new Promise(resolve => setTimeout(resolve, 3000));
 }
 
 let client: LanguageClient;
@@ -119,14 +119,14 @@ export async function activate(context: ExtensionContext): Promise<void> {
 
     client = startLangServer(pythonPath, ["-m", "server"], cwd);
 
-    if (!isPythonVersionCompatible("python3")) {
+    if (!isPythonVersionCompatible(pythonPath)) {
       window.showErrorMessage(
         "Stata Language Server: Invalid python version, needs python >= 3.6"
       );
       return;
     }
 
-    let setupSucceed = ispyglsInstalled("python3");
+    let setupSucceed = ispyglsInstalled(pythonPath);
     if (!setupSucceed) {
       const terminal = window.createTerminal("stata-ls");
       terminal.show(false);
@@ -134,11 +134,14 @@ export async function activate(context: ExtensionContext): Promise<void> {
         "# Install pygls on selected python.\n"
       );
       terminal.sendText(
-        `python3 -m pip install pygls --user`
+        `${pythonPath} -m pip install --user -r "${cwd}/requirements.txt"`
       );
-      for (let retries = 0; retries < 3; retries++) {
+      for (let retries = 0; retries < 5; retries++) {
         await shortDelay();
-        setupSucceed = ispyglsInstalled("python3");
+        setupSucceed = ispyglsInstalled(pythonPath);
+        if (setupSucceed) {
+          break;
+        }
       }
       if (setupSucceed) {
         window.showInformationMessage(

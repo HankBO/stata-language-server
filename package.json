@@ -22,18 +22,18 @@
   "contributes": {
     "languages": [
       {
-				"id": "stata",
-				"aliases": [
-					"Stata Enhanced",
-					"Stata",
-					"stata"
-				],
-				"extensions": [
-					".do",
-					".ado",
-					".mata"
-				]
-			}
+        "id": "stata",
+        "aliases": [
+          "Stata Enhanced",
+          "Stata",
+          "stata"
+        ],
+        "extensions": [
+          ".do",
+          ".ado",
+          ".mata"
+        ]
+      }
     ],
     "configuration": [
       {
@@ -64,7 +64,7 @@
     "compile": "tsc -b",
     "build": "vsce",
     "watch": "tsc -b -w",
-    "postinstall": "cd client && npm install && cd .."
+    "deploy": "vsce publish --yarn"
   },
   "devDependencies": {
     "@types/node": "^14.14.41",
@@ -72,10 +72,10 @@
     "@typescript-eslint/eslint-plugin": "^4.22.0",
     "@typescript-eslint/parser": "^4.22.0",
     "eslint": "^7.23.0",
-    "typescript": "^4.2.4"
+    "typescript": "^4.2.4",
+    "vsce": "^2.3.0"
   },
   "dependencies": {
-    "vsce": "^1.96.1",
     "vscode-languageclient": "^7.0.0"
   },
   "bugs": {

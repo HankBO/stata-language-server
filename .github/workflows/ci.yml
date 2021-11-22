@@ -3,6 +3,9 @@ on:
   push:
     branches:
       - master
+    release:
+      types:
+        - created
 
 env:
   NODE_VERSION: "14.x"
@@ -26,17 +29,13 @@ jobs:
           python-version: ${{ env.PYTHON_VERSION }}
       - name: Install xvfb
         run: sudo apt-get install xvfb
-      - name: npm install and compile
-        run: |
-          npm install
-          npm run compile
-      - name: npm audit
-        run: |
-          npm audit
-          cd client && npm audit
-      - name: lint
-        run: npm run lint
-      - name: run end to end test
-        run: xvfb-run npm run test
-      - name: build extension package
-        run: npm run build package
+      - run: npm install
+      - run: xvfb-run -a npm test
+        if: runner.os == 'Linux'
+      - run: npm test
+        if: runner.os != 'Linux'
+      - name: Publish
+        if: success() && startsWith( github.ref, 'refs/tags/releases/') && matrix.os == 'ubuntu-latest'
+        run: npm run deploy
+        env:
+          VSCE_PAT: ${{ secrets.VSCE_PAT }}

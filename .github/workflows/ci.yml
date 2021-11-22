@@ -1,0 +1,42 @@
+name: ci
+on:
+  push:
+    branches:
+      - master
+
+env:
+  NODE_VERSION: "14.x"
+  PYTHON_VERSION: "3.6"
+
+jobs:
+  build:
+    strategy:
+      matrix:
+        os: [macos-latest, ubuntu-latest, windows-latest]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@master
+      - name: Use Node.js ${{ env.NODE_VERSION }}
+        uses: actions/setup-node@v1
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+      - name: Install Python ${{ env.PYTHON_VERSION }}
+        uses: actions/setup-python@v1
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+      - name: Install xvfb
+        run: sudo apt-get install xvfb
+      - name: npm install and compile
+        run: |
+          npm install
+          npm run compile
+      - name: npm audit
+        run: |
+          npm audit
+          cd client && npm audit
+      - name: lint
+        run: npm run lint
+      - name: run end to end test
+        run: xvfb-run npm run test
+      - name: build extension package
+        run: npm run build package

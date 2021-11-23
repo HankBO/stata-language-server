@@ -156,9 +156,7 @@ def refresh_diagnostics(ls: StataLanguageServer, params):
         if len(line) > MAX_LINE_LENGTH:
             diagnostics.append(create_diagnostic(lineno, MAX_LINE_LENGTH, MAX_LINE_LENGTH, MAX_LINE_LENGTH_MESSAGE, MAX_LINE_LENGTH_SEVERITY))
         skip_tokens = []
-        # Star Comments
-        if re.match(STAR_COMMENTS, line):
-            continue
+
         # Comment block
         if LINE_STATE['isInComm'] is False:
             match = re.match(BLOCK_COMMENTS_BG, line)
@@ -182,6 +180,10 @@ def refresh_diagnostics(ls: StataLanguageServer, params):
                 LINE_STATE['isInComm'] = False
                 start, end = match.start(1), match.end(1)
                 skip_tokens.append([start, end])
+
+        # Star Comments
+        if re.match(STAR_COMMENTS, line):
+            continue
 
         # Inline Comment
         match = re.match(INLINE_COMM_RE, line)
@@ -220,7 +222,7 @@ def refresh_diagnostics(ls: StataLanguageServer, params):
         if match:
             start, end = match.start(1), match.end(1)
             actual_space = end - start
-            if actual_space != LINE_STATE['loopLevel'] * INDENT_SPACE:
+            if actual_space > 0 and actual_space != LINE_STATE['loopLevel'] * INDENT_SPACE:
                 diagnostics.append(create_diagnostic(lineno, end, end, INAP_INDENT_MESSAGE, INAP_INDENT_SEVERITY))
 
         if re.match(LOOP_START, line):

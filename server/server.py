@@ -222,7 +222,7 @@ def refresh_diagnostics(ls: StataLanguageServer, params):
         if match:
             start, end = match.start(1), match.end(1)
             actual_space = end - start
-            if actual_space > 0 and actual_space != LINE_STATE['loopLevel'] * INDENT_SPACE:
+            if actual_space != LINE_STATE['loopLevel'] * INDENT_SPACE:
                 diagnostics.append(create_diagnostic(lineno, end, end, INAP_INDENT_MESSAGE, INAP_INDENT_SEVERITY))
 
         if re.match(LOOP_START, line):

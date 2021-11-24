@@ -1,11 +1,13 @@
 {
   "name": "stata-language-server",
-  "description": "Simple Stata Syntaxlint",
-  "author": "HaiBo",
+  "displayName": "StataLanguageServer",
+  "description": "Simple Language Server for Stata in VS Code",
+  "icon": "assets/img/icon.png",
+  "author": "Hai Bo",
   "repository": "https://github.com/HankBO/stata-language-server",
   "license": "MIT",
-  "version": "0.1.3",
-  "publisher": "CHARLS",
+  "version": "0.2.0",
+  "publisher": "Hai Bo",
   "engines": {
     "vscode": "^1.55.0"
   },
@@ -18,18 +20,51 @@
     "onLanguage:stata"
   ],
   "contributes": {
-    "configuration": {
-      "type": "object",
-      "title": "Stata Server Configuration",
-      "properties": {
+    "languages": [
+      {
+        "id": "stata",
+        "aliases": [
+          "Stata Enhanced",
+          "Stata",
+          "stata"
+        ],
+        "extensions": [
+          ".do",
+          ".ado",
+          ".mata"
+        ]
       }
-    }
+    ],
+    "configuration": [
+      {
+        "type": "object",
+        "title": "Stata Server Configuration",
+        "properties": {
+          "stataServer.setMaxLineLength": {
+            "type": "number",
+            "minimum": "1",
+            "maximum": "300",
+            "default": "120",
+            "description": "Set max line length for codestyle checking."
+          },
+          "stataServer.setIndentSpace": {
+            "type": "number",
+            "minimum": "1",
+            "maximum": "8",
+            "default": "4",
+            "description": "Set indent space for codestyle checking."
+          }
+        }
+      }
+    ]
   },
   "main": "./client/out/extension",
   "scripts": {
     "vscode:prepublish": "npm run compile",
     "compile": "tsc -b",
-    "watch": "tsc -b -w"
+    "build": "vsce",
+    "watch": "tsc -b -w",
+    "deploy": "vsce publish --yarn"
   },
   "devDependencies": {
     "@types/node": "^14.14.41",
@@ -37,10 +72,17 @@
     "@typescript-eslint/eslint-plugin": "^4.22.0",
     "@typescript-eslint/parser": "^4.22.0",
     "eslint": "^7.23.0",
-    "typescript": "^4.2.4"
+    "typescript": "^4.2.4",
+    "vsce": "^2.3.0"
   },
   "dependencies": {
-    "vsce": "^1.96.1",
-    "vscode-languageclient": "^7.0.0",
-  }
+    "vscode-languageclient": "^7.0.0"
+  },
+  "bugs": {
+    "url": "https://github.com/HankBO/stata-language-server/issues"
+  },
+  "keywords": [
+    "Stata",
+    "Economics"
+  ]
 }

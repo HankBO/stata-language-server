@@ -4,3 +4,7 @@ node_modules
 server/__pycache__
 __pycache__
 .mypy_cache
+*.vsix
+.DS_Store
+.pytest_cache/
+client/out

@@ -1,4 +1,3 @@
-
 import os
 from pygls.lsp.types import (CompletionItem, CompletionList,
                              CompletionItemKind, MarkupContent)
@@ -32,3 +31,12 @@ def getComList(doc_path: str = 'md_syntax') -> CompletionList:
 
     comList = CompletionList(is_incomplete=False, items=itemList)
     return comList
+
+
+def convertJsonBool(string: str) -> bool:
+    if string == 'true':
+        return True
+    elif string == 'false':
+        return False
+    else:
+        raise ValueError

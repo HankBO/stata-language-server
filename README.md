@@ -1,48 +1,60 @@
 # Stata-Language-Server
 
-A [language server](https://microsoft.github.io/language-server-protocol/) for [Stata](https://www.stata.com/).
+> Write your Stata scripts more fluently!
 
 ## Description
 
-This plugin uses Markdown(GFM) format of Stata syntax(eg: replace.md) for syntax tips. Original Stata help files(.scml) are extracted and converted to markdown files using Python script([parse-smcl](https://github.com/sergiocorreia/parse-smcl)).
-Only Paragraph `Syntax` in a help-file will be showed while hovering.
+An extension for [Stata](https://www.stata.com/) on VS Code. It provides codestyle checking, goto-definition, syntax tips and auto completion.
+
+Developed based on [language server](https://microsoft.github.io/language-server-protocol/), depending on Third-party Python library [pygls](https://github.com/openlawlibrary/pygls).
+
+> Note: Python(>=3.6) is required on local system before extension installing. Another extension [Stata Enhanced](https://marketplace.visualstudio.com/items?itemName=kylebarron.stata-enhanced) is recommanded for syntax highlight since Stata Language Server doesn't provide this feature.
 
 ## Supported Features
 
-- Syntax auto completion
+- Codestyle Checking
 
-    Auto-Completion for most stata commands. Only support complete syntax(eg: `generate`, not `g(enerate)`) now.
+    When editing a stata do-file, the extension will check documents and show bad codestyle using wavy underlines.
 
-    ![completion](https://github.com/HankBO/stata-language-server/blob/develop/assets/img/completion.gif)
+    ![diagnostic](https://github.com/HankBO/stata-language-server/blob/develop/assets/img/diagnostics.gif)
 
 - Syntax tips while hovering
 
     When hovering on a complete command, a markdown formatted Syntax Description will appear.
 
-    Note: 1.this feature is not available for uncomplete commands(eg: `g`, `gen`) now. 2.some commands have no own help files since they are included in other commands(eg: `replace` belongs to `generate`)
+    > Note: Not available for 1.abbr. commands(eg: `g`, `gen`); 2.docstring included in another command's docstring(eg: `replace` belongs to `generate`)
 
     ![hover](https://github.com/HankBO/stata-language-server/blob/develop/assets/img/hover.gif)
 
+    > Note: Docstring files of this extension are only for academic purpose. The original work copyright belongs to StataCorp LLC. See ThirdPartyNotices.txt for details.
+
 - Goto Definition(`generate varname =`)
 
-    When right-click a variable name and click `Go to Definition`, this feature will find the last `generate` place before. It can match pattern like `g(enerate)`.
+    Find and jump to the last `generate` place when right-click a variable name and click `Go to Definition`. Can match pattern like `g(enerate)`.
 
     ![gotoDefinition](https://github.com/HankBO/stata-language-server/blob/develop/assets/img/gotoDefinition.gif)
 
-## Install Server Dependencies
+- Syntax auto completion
 
-- [pygls](https://github.com/openlawlibrary/pygls)(0.11.3)
+    Auto-Completion for most stata commands. Only support complete syntax(eg: `generate`, not `g(enerate)`).
 
-    `pip3 install pygls`
+    ![completion](https://github.com/HankBO/stata-language-server/blob/develop/assets/img/completion.gif)
 
-## Future Plan
+## Requirements
 
-Following Features will be implemented:
+- Python >= 3.6
 
-- [x] Codestyle diagnostics
-- [ ] IO optimization for Docstring and Command Tips, less file size
-- [ ] Add Option: keybinding for users to activate Docstring and Command Tips
+## Settings
 
-## Resources Referenced
+| Setting Name | Description | Default Value |
+|---|---|---|
+| `stataServer.setMaxLineLength` | Max line length for codestyle checking | `120` |
+| `stataServer.setIndentSpace` | Indent spaces for codetyle checking | `4` |
 
-- [Stata language support in Atom](https://github.com/kylebarron/language-stata)
+## Release Notes
+
+Refer to [CHANGELOG.md]
+
+## Issues
+
+Submit [issues] if you find any bug or have any suggestion.

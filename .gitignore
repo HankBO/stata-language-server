@@ -7,3 +7,4 @@ __pycache__
 *.vsix
 .DS_Store
 .pytest_cache/
+client/out

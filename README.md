@@ -2,6 +2,8 @@
 
 > Write your Stata scripts more fluently!
 
+[![Actions Status](https://github.com/HankBO/stata-language-server/actions/workflows/ci.yml/badge.svg)](https://github.com/HankBO/stata-language-server/actions/workflows/ci.yml)
+
 ## Description
 
 An extension for [Stata](https://www.stata.com/) on VS Code. It provides codestyle checking, goto-definition, syntax tips and auto completion.

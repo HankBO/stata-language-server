@@ -6,7 +6,7 @@
   "author": "Hai Bo",
   "repository": "https://github.com/HankBO/stata-language-server",
   "license": "MIT",
-  "version": "0.2.0",
+  "version": "1.0.0",
   "publisher": "hai-bo",
   "engines": {
     "vscode": "^1.55.0"
@@ -60,7 +60,11 @@
   },
   "main": "./client/out/extension",
   "scripts": {
-    "vscode:prepublish": "npm run compile",
+    "vscode:prepublish": "npm run esbuild-base -- --minify",
+    "esbuild-base": "esbuild ./src/extension.ts --bundle --outfile=out/main.js --external:vscode --format=cjs --platform=node",
+    "esbuild": "npm run esbuild-base -- --sourcemap",
+    "esbuild-watch": "npm run esbuild-base -- --sourcemap --watch",
+    "test-compile": "tsc -p ./",
     "compile": "tsc -b",
     "build": "vsce",
     "watch": "tsc -b -w",
@@ -71,6 +75,7 @@
     "@types/vscode": "^1.55.0",
     "@typescript-eslint/eslint-plugin": "^4.22.0",
     "@typescript-eslint/parser": "^4.22.0",
+    "esbuild": "^0.13.15",
     "eslint": "^7.23.0",
     "typescript": "^4.2.4",
     "vsce": "^2.3.0"

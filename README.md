@@ -18,7 +18,7 @@ Developed based on [language server](https://microsoft.github.io/language-server
 
     When editing a stata do-file, the extension will check documents and show bad codestyle using wavy underlines.
 
-    ![diagnostic](https://github.com/HankBO/stata-language-server/blob/develop/assets/img/diagnostics.gif)
+    ![diagnostic](assets/img/diagnostics.gif)
 
 - Syntax tips while hovering
 
@@ -26,7 +26,7 @@ Developed based on [language server](https://microsoft.github.io/language-server
 
     > Note: Not available for 1.abbr. commands(eg: `g`, `gen`); 2.docstring included in another command's docstring(eg: `replace` belongs to `generate`)
 
-    ![hover](https://github.com/HankBO/stata-language-server/blob/develop/assets/img/hover.gif)
+    ![hover](assets/img/hover.gif)
 
     > Note: Docstring files of this extension are only for academic purpose. The original work copyright belongs to StataCorp LLC. See ThirdPartyNotices.txt for details.
 
@@ -34,13 +34,13 @@ Developed based on [language server](https://microsoft.github.io/language-server
 
     Find and jump to the last `generate` place when right-click a variable name and click `Go to Definition`. Can match pattern like `g(enerate)`.
 
-    ![gotoDefinition](https://github.com/HankBO/stata-language-server/blob/develop/assets/img/gotoDefinition.gif)
+    ![gotoDefinition](assets/img/gotoDefinition.gif)
 
 - Syntax auto completion
 
     Auto-Completion for most stata commands. Only support complete syntax(eg: `generate`, not `g(enerate)`).
 
-    ![completion](https://github.com/HankBO/stata-language-server/blob/develop/assets/img/completion.gif)
+    ![completion](assets/img/completion.gif)
 
 ## Requirements
 
@@ -55,8 +55,8 @@ Developed based on [language server](https://microsoft.github.io/language-server
 
 ## Release Notes
 
-Refer to [CHANGELOG.md]
+Refer to [CHANGELOG.md](https://github.com/HankBO/stata-language-server/blob/main/CHANGELOG.md)
 
 ## Issues
 
-Submit [issues] if you find any bug or have any suggestion.
+Submit [issues](https://github.com/HankBO/stata-language-server/issues) if you find any bug or have any suggestion.

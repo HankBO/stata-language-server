@@ -7,6 +7,7 @@ and this project adheres to [Semantic Versioning][semver].
 
 ## [1.0.1]
 
+- Fixed node modules not installed
 - Fixed gif links in README.MD
 - Changed package.json: use esbuild to bundle extension
 - Updated .vscodeignore

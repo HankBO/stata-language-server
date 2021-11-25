@@ -27,8 +27,6 @@ jobs:
         uses: actions/setup-python@v1
         with:
           python-version: ${{ env.PYTHON_VERSION }}
-      - name: Install xvfb
-        run: sudo apt-get install xvfb
       - run: npm install
       - run: xvfb-run -a npm test
         if: runner.os == 'Linux'

@@ -2,6 +2,7 @@ import os
 from pygls.lsp.types import (CompletionItem, CompletionList,
                              CompletionItemKind, MarkupContent)
 from functools import lru_cache
+import json
 
 
 @lru_cache(maxsize=64)
@@ -13,22 +14,18 @@ def getDocstringFromWord(word: str, doc_path: str = 'md_syntax') -> MarkupConten
     except FileNotFoundError:
         docstring = ""
     return MarkupContent(
-            kind = 'markdown',
-            value = docstring
+            kind='markdown',
+            value=docstring
     )
 
 
-def getComItemFromFilename(name: str, kind=CompletionItemKind.Keyword, doc_path: str = "") -> CompletionItem:
-
-    comItem = CompletionItem(label=name, kind=kind, documentation=doc_path)
-    return comItem
-
-
-def getComList(doc_path: str = 'md_syntax') -> CompletionList:
-    all_fn = os.listdir(doc_path)
+def getComList(doc_path: str = 'commands.json') -> CompletionList:
+    with open(doc_path, 'r') as jf:
+        jstr = jf.read()
+    cmd_list = json.loads(jstr)["syntax"]
     itemList = []
-    for base_fn in all_fn:
-        comItem = getComItemFromFilename(name=base_fn.split('.')[0], doc_path=doc_path)
+    for cmd in cmd_list:
+        comItem = comItem = CompletionItem(label=cmd, kind=CompletionItemKind.Function)
         itemList.append(comItem)
 
     comList = CompletionList(is_incomplete=False, items=itemList)
@@ -42,4 +39,3 @@ def convertJsonBool(string: str) -> bool:
         return False
     else:
         raise ValueError
-

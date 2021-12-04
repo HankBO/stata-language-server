@@ -1,16 +1,16 @@
 import uuid
-
-from pygls.protocol import LanguageServerProtocol
+from concurrent.futures import Future
+from pygls.protocol import LanguageServerProtocol, lsp_method
 import server.utils as utils
 from pygls.lsp.types.basic_structures import Diagnostic, DiagnosticSeverity
 from pygls.lsp.types.workspace import (ConfigurationItem, ConfigurationParams,
-     DidChangeTextDocumentParams, DidCloseTextDocumentParams, DidOpenTextDocumentParams)
+     DidChangeTextDocumentParams, DidCloseTextDocumentParams, DidOpenTextDocumentParams,
+     DidChangeConfigurationParams)
 from typing import Optional
 import re
 from pygls.lsp.methods import (COMPLETION, HOVER, DEFINITION, TEXT_DOCUMENT_DID_CHANGE,
                                TEXT_DOCUMENT_DID_CLOSE,
-                               TEXT_DOCUMENT_PUBLISH_DIAGNOSTICS, TEXT_DOCUMENT_DID_OPEN,
-                               WORKSPACE_CONFIGURATION)
+                               TEXT_DOCUMENT_DID_OPEN, WORKSPACE_DID_CHANGE_CONFIGURATION)
 from pygls.server import LanguageServer
 from pygls.lsp.types import (CompletionList, CompletionParams, Location, DefinitionParams,
                              Hover, HoverParams, MessageType, Position, Range, Registration,
@@ -22,32 +22,21 @@ from server.constants import (MAX_LINE_LENGTH_MESSAGE, OPERATOR_REGEX, STRING, S
                               OP_WHITESPACE_MESSAGE, COMMA_WHITESPACE_MESSAGE, INAP_INDENT_MESSAGE,
                               MAX_LINE_LENGTH_SEVERITY, MAX_LINE_LENGTH, INDENT_SPACE,
                               OP_WHITESPACE_SEVERITY, COMMA_WHITESPACE_SEVERITY, INAP_INDENT_SEVERITY,
-                              USECOMPLETION, USEDOCSTRING, USESTYLECHECKING)
-COMLIST = utils.getComList()  # TODO: Optimize IO speed
-
-
-class StataLanguageServerProtocol(LanguageServerProtocol):
-    """
-        Override some build-in fuctions.
-        #TODO: Conditionally register fuction to features based on configures.
-    """
-    def __init__(self):
-        super().__init__()
+                              ENABLECOMPLETION, ENABLEDOCSTRING, ENABLESTYLECHECKING)
+import logging
+logging.basicConfig(level = logging.INFO,format = '%(asctime)s - %(name)s - %(levelname)s - %(message)s')            
+logger = logging.getLogger(__name__)
 
 
 class StataLanguageServer(LanguageServer):
     CMD_REGISTER_COMPLETIONS = 'registerCompletions'
     CMD_REGISTER_HOVER = 'registerHover'
     CMD_REGISTER_DEFINITION = 'registerDefinition'
-    CMD_GET_CONFIGURATION_CALLBACK = 'getConfigurationCallback'
     CMD_UNREGISTER_COMPLETIONS = 'unregisterCompletions'
     CMD_UNREGISTER_HOVER = 'unregisterHover'
     CMD_UNREGISTER_DEFINITION = 'unregisterDefinition'
 
     CONFIGURATION_SECTION = 'stataServer'
-
-    def __init__(self, protocol_cls=StataLanguageServerProtocol):
-        super().__init__()
 
 
 stata_server = StataLanguageServer()
@@ -57,36 +46,43 @@ COMLIST = utils.getComList()  # TODO: Optimize IO speed
 @stata_server.feature(TEXT_DOCUMENT_DID_CHANGE)
 def did_change(ls, params: DidChangeTextDocumentParams):
     """Text document did change notification."""
-    refresh_diagnostics(ls, params)
+    if ENABLESTYLECHECKING:
+        refresh_diagnostics(ls, params)
 
 
 @stata_server.feature(TEXT_DOCUMENT_DID_CLOSE)
 def did_close(server: StataLanguageServer, params: DidCloseTextDocumentParams):
     """Text document did close notification."""
-    server.show_message_log('Do File Did Close')
+    server.show_message_log('Stata File Did Close')
 
 
 @stata_server.feature(TEXT_DOCUMENT_DID_OPEN)
 async def did_open(ls, params: DidOpenTextDocumentParams):
     """Text document did open notification."""
-    ls.show_message_log('Do File Did Open')
-    get_configuration_callback(ls)
-    refresh_diagnostics(ls, params)
+    ls.show_message_log('Stata File Did Open')
+    if ENABLESTYLECHECKING:
+        refresh_diagnostics(ls, params)
 
 
 @stata_server.feature(COMPLETION)
 def completions(params: Optional[CompletionParams] = None) -> CompletionList:
     """Return completion items."""
-    return COMLIST
+    if ENABLECOMPLETION:
+        return COMLIST
+    else:
+        return None
 
 
 @stata_server.feature(HOVER)
 def hover(ls, params: HoverParams):
     """Display Markdown documentation for the element under the cursor."""
-    document = ls.workspace.get_document(params.text_document.uri)
-    word = document.word_at_position(params.position)  # return start and end positions
-    docstring = utils.getDocstringFromWord(word)
-    return Hover(contents=docstring)
+    if ENABLEDOCSTRING:
+        document = ls.workspace.get_document(params.text_document.uri)
+        word = document.word_at_position(params.position)  # return start and end positions
+        docstring = utils.getDocstringFromWord(word)
+        return Hover(contents=docstring)
+    else:
+        return None
 
 
 @stata_server.feature(DEFINITION)
@@ -142,7 +138,6 @@ def inSkipTokens(start, end, skip_tokens: list) -> bool:
     return False
 
 
-@stata_server.feature(TEXT_DOCUMENT_PUBLISH_DIAGNOSTICS)
 def refresh_diagnostics(ls: StataLanguageServer, params):
     """
         Codestyle checking and publish diagnostics.
@@ -232,24 +227,29 @@ def refresh_diagnostics(ls: StataLanguageServer, params):
     ls.publish_diagnostics(doc_uri=uri, diagnostics=diagnostics)
 
 
-@stata_server.command(StataLanguageServer.CMD_GET_CONFIGURATION_CALLBACK)
 def get_configuration_callback(ls: StataLanguageServer, *args):
     def _config_callback(config):
-        global MAX_LINE_LENGTH, INDENT_SPACE, USECOMPLETION, USEDOCSTRING, USESTYLECHECKING
+        global MAX_LINE_LENGTH, INDENT_SPACE, ENABLECOMPLETION, ENABLEDOCSTRING, ENABLESTYLECHECKING
         try:
-            MAX_LINE_LENGTH = int(eval(config[0].get('setMaxLineLength')))
-            INDENT_SPACE = int(eval(config[0].get('setIndentSpace')))
-            USECOMPLETION = utils.convertJsonBool(config[0].get('useCompletion'))
-            USEDOCSTRING = utils.convertJsonBool(config[0].get('useDocstring'))
-            USESTYLECHECKING = utils.convertJsonBool(config[0].get('useStyleChecking'))
+            MAX_LINE_LENGTH = int(config[0].get('setMaxLineLength'))
+            INDENT_SPACE = int(config[0].get('setIndentSpace'))
+            ENABLECOMPLETION = config[0].get('enableCompletion')
+            ENABLEDOCSTRING = config[0].get('enableDocstring')
+            ENABLESTYLECHECKING = config[0].get('enableStyleChecking')
         except Exception as e:
-            ls.show_message_log(f'Error ocurred: {e}')        
+            ls.show_message_log(f'Error ocurred: {e}')
     ls.get_configuration(ConfigurationParams(items=[
         ConfigurationItem(
             scope_uri='',
             section=StataLanguageServer.CONFIGURATION_SECTION
         )
     ]), _config_callback)
+
+
+@stata_server.feature(WORKSPACE_DID_CHANGE_CONFIGURATION)
+def refresh_config(ls, params: DidChangeConfigurationParams):
+    if params.settings == 200:
+        get_configuration_callback(ls)
 
 
 @stata_server.command(StataLanguageServer.CMD_REGISTER_COMPLETIONS)
@@ -269,7 +269,9 @@ async def register_completions(ls: StataLanguageServer, *args):
 @stata_server.command(StataLanguageServer.CMD_UNREGISTER_COMPLETIONS)
 async def unregister_completions(ls: StataLanguageServer, *args):
     """Unregister completions method on the client."""
-    params = UnregistrationParams(unregistrations=[Unregistration(id=str(uuid.uuid4()), method=COMPLETION)])
+    params = UnregistrationParams(unregisterations=[Unregistration(
+                    id=str(uuid.uuid4()),
+                    method=COMPLETION)])
     response = await ls.unregister_capability_async(params)
     if response is None:
         ls.show_message_log('Successfully unregistered completions method')
@@ -281,7 +283,7 @@ async def unregister_completions(ls: StataLanguageServer, *args):
 @stata_server.command(StataLanguageServer.CMD_REGISTER_HOVER)
 async def register_hover(ls: StataLanguageServer, *args):
     """Register hover method on the client."""
-    params = RegistrationParams(registrations=[Registration(id=str(uuid.uuid4()), method=HOVER)])
+    params = RegistrationParams(unregisterations=[Registration(id=str(uuid.uuid4()), method=HOVER)])
     response = await ls.register_capability_async(params)
     if response is None:
         ls.show_message_log('Successfully registered hover method')
@@ -293,7 +295,7 @@ async def register_hover(ls: StataLanguageServer, *args):
 @stata_server.command(StataLanguageServer.CMD_UNREGISTER_HOVER)
 async def unregister_hover(ls: StataLanguageServer, *args):
     """Unregister hover method on the client."""
-    params = UnregistrationParams(unregistrations=[Unregistration(id=str(uuid.uuid4()), method=HOVER)])
+    params = UnregistrationParams(unregisterations=[Unregistration(id=str(uuid.uuid4()), method=HOVER)])
     response = await ls.unregister_capability_async(params)
     if response is None:
         ls.show_message_log('Successfully unregistered hover method')
@@ -305,7 +307,7 @@ async def unregister_hover(ls: StataLanguageServer, *args):
 @stata_server.command(StataLanguageServer.CMD_REGISTER_DEFINITION)
 async def register_definition(ls: StataLanguageServer, *args):
     """Register definition method on the client."""
-    params = RegistrationParams(registrations=[Registration(id=str(uuid.uuid4()),
+    params = RegistrationParams(unregisterations=[Registration(id=str(uuid.uuid4()),
                                                             method=DEFINITION)])
     response = await ls.register_capability_async(params)
     if response is None:
@@ -318,7 +320,7 @@ async def register_definition(ls: StataLanguageServer, *args):
 @stata_server.command(StataLanguageServer.CMD_UNREGISTER_DEFINITION)
 async def unregister_definition(ls: StataLanguageServer, *args):
     """Unregister definition method on the client."""
-    params = UnregistrationParams(unregistrations=[Unregistration(id=str(uuid.uuid4()),
+    params = UnregistrationParams(unregisterations=[Unregistration(id=str(uuid.uuid4()),
                                                                   method=DEFINITION)])
     response = await ls.unregister_capability_async(params)
     if response is None:

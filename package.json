@@ -41,18 +41,33 @@
         "title": "Stata Server Configuration",
         "properties": {
           "stataServer.setMaxLineLength": {
-            "type": "number",
-            "minimum": "1",
-            "maximum": "300",
-            "default": "120",
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 300,
+            "default": 120,
             "description": "Set max line length for codestyle checking."
           },
           "stataServer.setIndentSpace": {
-            "type": "number",
-            "minimum": "1",
-            "maximum": "8",
-            "default": "4",
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 8,
+            "default": 4,
             "description": "Set indent space for codestyle checking."
+          },
+          "stataServer.enableCompletion": {
+            "type": "boolean",
+            "default": true,
+            "description": "Turn on/off auto-completion."
+          },
+          "stataServer.enableDocstring": {
+            "type": "boolean",
+            "default": true,
+            "description": "Turn on/off docstring tips."
+          },
+          "stataServer.enableStyleChecking": {
+            "type": "boolean",
+            "default": true,
+            "description": "Turn on/off codestyle checking."
           }
         }
       }

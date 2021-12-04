@@ -5,9 +5,9 @@ from pygls.lsp.types.basic_structures import DiagnosticSeverity
 # Configures
 MAX_LINE_LENGTH = 120
 INDENT_SPACE = 4
-USECOMPLETION = True
-USEDOCSTRING = True
-USESTYLECHECKING = True
+ENABLECOMPLETION = True
+ENABLEDOCSTRING = True
+ENABLESTYLECHECKING = True
 
 # Diagnostic Regex
 STAR_COMMENTS = re.compile(r'^s*(\*)')

@@ -1,8 +1,10 @@
 import os
 from pygls.lsp.types import (CompletionItem, CompletionList,
                              CompletionItemKind, MarkupContent)
+from functools import lru_cache
 
 
+@lru_cache(maxsize=64)
 def getDocstringFromWord(word: str, doc_path: str = 'md_syntax') -> MarkupContent:
 
     try:
@@ -40,3 +42,4 @@ def convertJsonBool(string: str) -> bool:
         return False
     else:
         raise ValueError
+

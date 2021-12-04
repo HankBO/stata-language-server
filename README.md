@@ -52,6 +52,9 @@ Developed based on [language server](https://microsoft.github.io/language-server
 |---|---|---|
 | `stataServer.setMaxLineLength` | Max line length for codestyle checking | `120` |
 | `stataServer.setIndentSpace` | Indent spaces for codetyle checking | `4` |
+| `stataServer.enableCompletion` | Turn on/off auto-completion | `true` |
+| `stataServer.enableDocstring` | Turn on/off docstring tips | `true` |
+| `stataServer.enableStyleChecking` | Turn on/off codestyle checking | `true` |
 
 ## Release Notes
 

@@ -1,6 +1,6 @@
 // A launch configuration that compiles the extension and then opens it inside a new window
 {
-    "version": "0.2.0",
+    "version": "1.1.0",
     "configurations": [
         {
             "name": "Launch Client",
@@ -57,6 +57,13 @@
             "name": "Server + Client",
             "configurations": [
                 "Launch Server",
+                "Launch Client"
+            ]
+        },
+        {
+            "name": "Server[WS] + Client",
+            "configurations": [
+                "Launch Server [WebSockets]",
                 "Launch Client"
             ]
         }

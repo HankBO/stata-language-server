@@ -21,13 +21,6 @@ from server.constants import (MAX_LINE_LENGTH_MESSAGE, OPERATOR_REGEX, STRING, S
 
 
 class StataLanguageServer(LanguageServer):
-    CMD_REGISTER_COMPLETIONS = 'registerCompletions'
-    CMD_REGISTER_HOVER = 'registerHover'
-    CMD_REGISTER_DEFINITION = 'registerDefinition'
-    CMD_UNREGISTER_COMPLETIONS = 'unregisterCompletions'
-    CMD_UNREGISTER_HOVER = 'unregisterHover'
-    CMD_UNREGISTER_DEFINITION = 'unregisterDefinition'
-
     CONFIGURATION_SECTION = 'stataServer'
 
 

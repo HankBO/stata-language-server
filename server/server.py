@@ -1,6 +1,3 @@
-import uuid
-from concurrent.futures import Future
-from pygls.protocol import LanguageServerProtocol, lsp_method
 import server.utils as utils
 from pygls.lsp.types.basic_structures import Diagnostic, DiagnosticSeverity
 from pygls.lsp.types.workspace import (ConfigurationItem, ConfigurationParams,
@@ -13,9 +10,7 @@ from pygls.lsp.methods import (COMPLETION, HOVER, DEFINITION, TEXT_DOCUMENT_DID_
                                TEXT_DOCUMENT_DID_OPEN, WORKSPACE_DID_CHANGE_CONFIGURATION)
 from pygls.server import LanguageServer
 from pygls.lsp.types import (CompletionList, CompletionParams, Location, DefinitionParams,
-                             Hover, HoverParams, MessageType, Position, Range, Registration,
-                             RegistrationParams, Unregistration, UnregistrationParams,
-                             PublishDiagnosticsParams)
+                             Hover, HoverParams, Position, Range)
 from server.constants import (MAX_LINE_LENGTH_MESSAGE, OPERATOR_REGEX, STRING, STAR_COMMENTS,
                               WHITESPACE_AFTER_COMMA_REGEX, OPERATOR_REGEX, BLOCK_COMMENTS_BG,
                               BLOCK_COMMENTS_END, INLINE_COMM_RE, LOOP_START, LOOP_END, INDENT_REGEX,
@@ -23,9 +18,6 @@ from server.constants import (MAX_LINE_LENGTH_MESSAGE, OPERATOR_REGEX, STRING, S
                               MAX_LINE_LENGTH_SEVERITY, MAX_LINE_LENGTH, INDENT_SPACE,
                               OP_WHITESPACE_SEVERITY, COMMA_WHITESPACE_SEVERITY, INAP_INDENT_SEVERITY,
                               ENABLECOMPLETION, ENABLEDOCSTRING, ENABLESTYLECHECKING)
-import logging
-logging.basicConfig(level = logging.INFO,format = '%(asctime)s - %(name)s - %(levelname)s - %(message)s')            
-logger = logging.getLogger(__name__)
 
 
 class StataLanguageServer(LanguageServer):
@@ -40,7 +32,7 @@ class StataLanguageServer(LanguageServer):
 
 
 stata_server = StataLanguageServer()
-COMLIST = utils.getComList()  # TODO: Optimize IO speed
+COMLIST = utils.getComList()
 
 
 @stata_server.feature(TEXT_DOCUMENT_DID_CHANGE)
@@ -51,9 +43,10 @@ def did_change(ls, params: DidChangeTextDocumentParams):
 
 
 @stata_server.feature(TEXT_DOCUMENT_DID_CLOSE)
-def did_close(server: StataLanguageServer, params: DidCloseTextDocumentParams):
+def did_close(ls: StataLanguageServer, params: DidCloseTextDocumentParams):
     """Text document did close notification."""
-    server.show_message_log('Stata File Did Close')
+    ls.show_message_log('Stata File Did Close')
+    clear_diagnostics(ls, params)
 
 
 @stata_server.feature(TEXT_DOCUMENT_DID_OPEN)
@@ -227,6 +220,12 @@ def refresh_diagnostics(ls: StataLanguageServer, params):
     ls.publish_diagnostics(doc_uri=uri, diagnostics=diagnostics)
 
 
+def clear_diagnostics(ls: StataLanguageServer, params):
+    """Clear diagnostics."""
+    uri = ls.workspace.get_document(params.text_document.uri).uri
+    ls.publish_diagnostics(doc_uri=uri, diagnostics=[])
+
+
 def get_configuration_callback(ls: StataLanguageServer, *args):
     def _config_callback(config):
         global MAX_LINE_LENGTH, INDENT_SPACE, ENABLECOMPLETION, ENABLEDOCSTRING, ENABLESTYLECHECKING
@@ -250,81 +249,3 @@ def get_configuration_callback(ls: StataLanguageServer, *args):
 def refresh_config(ls, params: DidChangeConfigurationParams):
     if params.settings == 200:
         get_configuration_callback(ls)
-
-
-@stata_server.command(StataLanguageServer.CMD_REGISTER_COMPLETIONS)
-async def register_completions(ls: StataLanguageServer, *args):
-    """Register completions method on the client."""
-    params = RegistrationParams(registrations=[Registration(
-                    id=str(uuid.uuid4()),
-                    method=COMPLETION,)])
-    response = await ls.register_capability_async(params)
-    if response is None:
-        ls.show_message_log('Successfully registered completions method')
-    else:
-        ls.show_message_log('Error happened during completions registration.',
-                        MessageType.Error)
-
-
-@stata_server.command(StataLanguageServer.CMD_UNREGISTER_COMPLETIONS)
-async def unregister_completions(ls: StataLanguageServer, *args):
-    """Unregister completions method on the client."""
-    params = UnregistrationParams(unregisterations=[Unregistration(
-                    id=str(uuid.uuid4()),
-                    method=COMPLETION)])
-    response = await ls.unregister_capability_async(params)
-    if response is None:
-        ls.show_message_log('Successfully unregistered completions method')
-    else:
-        ls.show_message_log('Error happened during completions unregistration.',
-                        MessageType.Error)
-
-
-@stata_server.command(StataLanguageServer.CMD_REGISTER_HOVER)
-async def register_hover(ls: StataLanguageServer, *args):
-    """Register hover method on the client."""
-    params = RegistrationParams(unregisterations=[Registration(id=str(uuid.uuid4()), method=HOVER)])
-    response = await ls.register_capability_async(params)
-    if response is None:
-        ls.show_message_log('Successfully registered hover method')
-    else:
-        ls.show_message_log('Error happened during hover registration.',
-                        MessageType.Error)
-
-
-@stata_server.command(StataLanguageServer.CMD_UNREGISTER_HOVER)
-async def unregister_hover(ls: StataLanguageServer, *args):
-    """Unregister hover method on the client."""
-    params = UnregistrationParams(unregisterations=[Unregistration(id=str(uuid.uuid4()), method=HOVER)])
-    response = await ls.unregister_capability_async(params)
-    if response is None:
-        ls.show_message_log('Successfully unregistered hover method')
-    else:
-        ls.show_message_log('Error happened during hover unregistration.',
-                        MessageType.Error)
-
-
-@stata_server.command(StataLanguageServer.CMD_REGISTER_DEFINITION)
-async def register_definition(ls: StataLanguageServer, *args):
-    """Register definition method on the client."""
-    params = RegistrationParams(unregisterations=[Registration(id=str(uuid.uuid4()),
-                                                            method=DEFINITION)])
-    response = await ls.register_capability_async(params)
-    if response is None:
-        ls.show_message_log('Successfully registered definition method')
-    else:
-        ls.show_message_log('Error happened during definition registration.',
-                        MessageType.Error)
-
-
-@stata_server.command(StataLanguageServer.CMD_UNREGISTER_DEFINITION)
-async def unregister_definition(ls: StataLanguageServer, *args):
-    """Unregister definition method on the client."""
-    params = UnregistrationParams(unregisterations=[Unregistration(id=str(uuid.uuid4()),
-                                                                  method=DEFINITION)])
-    response = await ls.unregister_capability_async(params)
-    if response is None:
-        ls.show_message_log('Successfully unregistered definition method')
-    else:
-        ls.show_message_log('Error happened during definition unregistration.',
-                        MessageType.Error)

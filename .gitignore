@@ -9,3 +9,4 @@ __pycache__
 .pytest_cache/
 client/out
 out/
+cmdsToJson.py

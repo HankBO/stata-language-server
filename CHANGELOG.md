@@ -5,6 +5,10 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog][keepachangelog],
 and this project adheres to [Semantic Versioning][semver].
 
+## [1.1.1]
+
+- Fixed python version checking
+
 ## [1.1.0]
 
 - Fixed ineffect settings
@@ -56,6 +60,7 @@ and this project adheres to [Semantic Versioning][semver].
 [keepachangelog]: https://keepachangelog.com/en/1.0.0/
 [semver]: https://semver.org/spec/v2.0.0.html
 
+[1.1.1]: https://github.com/HankBO/stata-language-server/compare/v1.1.0...v1.1.1
 [1.1.0]: https://github.com/HankBO/stata-language-server/compare/v1.0.3...v1.1.0
 [1.0.3]: https://github.com/HankBO/stata-language-server/compare/v1.0.2...v1.0.3
 [1.0.2]: https://github.com/HankBO/stata-language-server/compare/v1.0.1...v1.0.2

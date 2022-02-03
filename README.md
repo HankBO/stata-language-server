@@ -46,6 +46,8 @@ Developed based on [language server](https://microsoft.github.io/language-server
 
 - Python >= 3.6
 
+> Note: The extension takes the value(default `python`) of `python.pythonPath` in VSCode's Settings as the running version. You may check that terminal command `python` are correctly linked to v3.6 or later, or change the path to a full path in VSCode.
+
 ## Settings
 
 | Setting Name | Description | Default Value |

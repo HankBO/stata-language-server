@@ -38,7 +38,7 @@ import * as child_process from "child_process";
   try {
     child_process.execFileSync(python, [
       "-c",
-      "import sys; sys.exit(sys.version_info[:2] >= (3, 6))"
+      "import sys; sys.exit(abs(int(sys.version_info[:2] >= (3, 6)) - 1))"
     ]);
     return true;
   } catch {

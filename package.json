@@ -6,7 +6,7 @@
   "author": "Hai Bo",
   "repository": "https://github.com/HankBO/stata-language-server",
   "license": "MIT",
-  "version": "1.1.1",
+  "version": "1.1.2",
   "publisher": "hai-bo",
   "engines": {
     "vscode": "^1.55.0"

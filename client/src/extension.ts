@@ -11,7 +11,6 @@
 import * as net from "net";
 import * as path from "path";
 import { ExtensionContext, ExtensionMode, workspace, window } from "vscode";
-import { DidChangeConfigurationParams } from "vscode-languageclient"
 import { LanguageClient, LanguageClientOptions, ServerOptions } from "vscode-languageclient/node";
 import * as child_process from "child_process";
 
@@ -148,26 +147,6 @@ export async function activate(context: ExtensionContext): Promise<void> {
 
   context.subscriptions.push(client.start());
 
-  // Listening to configuration changes
-  // send changing notification of turning on/off features from user's config
-  /*
-  context.subscriptions.push(workspace.onDidChangeConfiguration(e => {
-    if (e.affectsConfiguration('stataServer.enableCompletion')) {
-      const value: any = workspace.getConfiguration('').get('stataServer.enableCompletion');
-      console.log(value)
-      const comParam: DidChangeConfigurationParams = {settings: {'enableCompletion': value}}
-      client.sendNotification('workspace/didChangeConfiguration', comParam)
-    }
-
-    if (e.affectsConfiguration('stataServer.enableDocstring')) {
-      const value: any = workspace.getConfiguration('').get('stataServer.enableDocstring');
-      console.log(value)
-      const comParam: DidChangeConfigurationParams = {settings: {'enableDocstring': value}}
-      client.sendNotification('workspace/didChangeConfiguration', comParam)
-    }
-
-  }));
-  */
 }
 
 export function deactivate(): Thenable<void> {

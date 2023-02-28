@@ -1,11 +1,10 @@
 from abc import get_cache_token
 from typing import Optional
-from pygls.lsp.types.basic_structures import Location, Position, TextDocumentIdentifier, TextDocumentItem
-from pygls.lsp.types.language_features import HoverParams, DefinitionParams
-from pygls.lsp.types.workspace import DidOpenTextDocumentParams
+from lsprotocol.types import Location, Position, TextDocumentIdentifier, TextDocumentItem
+from lsprotocol.types import HoverParams, DefinitionParams
+from lsprotocol.types import DidOpenTextDocumentParams
 import pytest
 from mock import Mock
-from pygls.lsp.types import TextDocumentIdentifier
 from pygls.workspace import Document, Workspace
 
 from server.server import (completions, get_configuration_callback, hover, goto_definition,
@@ -36,7 +35,7 @@ fake_diagParams = DidOpenTextDocumentParams(
                   text_document=TextDocumentItem(
                         uri=fake_document_uri,
                         language_id='stata',
-                        version='13',
+                        version=13,
                         text=fake_document_content
                   ))
 

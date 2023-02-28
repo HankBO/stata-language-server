@@ -6,10 +6,10 @@
   "author": "Hai Bo",
   "repository": "https://github.com/HankBO/stata-language-server",
   "license": "MIT",
-  "version": "1.1.2",
+  "version": "1.1.3",
   "publisher": "hai-bo",
   "engines": {
-    "vscode": "^1.55.0"
+    "vscode": "^1.62.0"
   },
   "categories": [
     "Linters",
@@ -38,36 +38,41 @@
     "configuration": [
       {
         "type": "object",
-        "title": "Stata Server Configuration",
+        "title": "StataServer",
         "properties": {
           "stataServer.setMaxLineLength": {
             "type": "integer",
             "minimum": 1,
             "maximum": 300,
             "default": 120,
-            "description": "Set max line length for codestyle checking."
+            "description": "Set max line length for codestyle checking.",
+            "scope": "window"
           },
           "stataServer.setIndentSpace": {
             "type": "integer",
             "minimum": 1,
             "maximum": 8,
             "default": 4,
-            "description": "Set indent space for codestyle checking."
+            "description": "Set indent space for codestyle checking.",
+            "scope": "window"
           },
           "stataServer.enableCompletion": {
             "type": "boolean",
             "default": true,
-            "description": "Turn on/off auto-completion."
+            "description": "Turn on/off auto-completion.",
+            "scope": "window"
           },
           "stataServer.enableDocstring": {
             "type": "boolean",
             "default": true,
-            "description": "Turn on/off docstring tips."
+            "description": "Turn on/off docstring tips.",
+            "scope": "window"
           },
           "stataServer.enableStyleChecking": {
             "type": "boolean",
             "default": true,
-            "description": "Turn on/off codestyle checking."
+            "description": "Turn on/off codestyle checking.",
+            "scope": "window"
           }
         }
       }
@@ -82,13 +87,13 @@
     "deploy": "vsce publish --yarn"
   },
   "devDependencies": {
-    "@types/node": "^14.14.41",
-    "@types/vscode": "^1.55.0",
-    "@typescript-eslint/eslint-plugin": "^4.22.0",
-    "@typescript-eslint/parser": "^4.22.0",
-    "eslint": "^7.23.0",
-    "typescript": "^4.2.4",
-    "vsce": "^2.3.0"
+    "@types/node": "^16.11.6",
+    "@types/vscode": "^1.62.0",
+    "@typescript-eslint/eslint-plugin": "^5.3.0",
+    "@typescript-eslint/parser": "^5.3.0",
+    "eslint": "^8.2.0",
+    "typescript": "^4.4.4",
+    "@vscode/vsce": "^2.16.0"
   },
   "dependencies": {
     "vscode-languageclient": "^7.0.0"

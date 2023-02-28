@@ -9,7 +9,7 @@ on:
 
 env:
   NODE_VERSION: "14.x"
-  PYTHON_VERSION: "3.6"
+  PYTHON_VERSION: "3.7"
 
 jobs:
   build:

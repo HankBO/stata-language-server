@@ -1,6 +1,6 @@
 import os
-from pygls.lsp.types import (CompletionItem, CompletionList,
-                             CompletionItemKind, MarkupContent)
+from lsprotocol.types import (CompletionItem, CompletionList,
+                              CompletionItemKind, MarkupContent)
 from functools import lru_cache
 import json
 

@@ -38,7 +38,7 @@ import * as child_process from "child_process";
   try {
     child_process.execFileSync(python, [
       "-c",
-      "import sys; sys.exit(abs(int(sys.version_info[:2] >= (3, 6)) - 1))"
+      "import sys; sys.exit(abs(int(sys.version_info[:2] >= (3, 7)) - 1))"
     ]);
     return true;
   } catch {
@@ -112,7 +112,7 @@ export async function activate(context: ExtensionContext): Promise<void> {
 
     if (!isPythonVersionCompatible(pythonPath)) {
       window.showErrorMessage(
-        "Stata Language Server: Invalid python version, needs python >= 3.6"
+        "Stata Language Server: Invalid python version, needs python >= 3.7"
       );
       return;
     }
@@ -150,14 +150,24 @@ export async function activate(context: ExtensionContext): Promise<void> {
 
   // Listening to configuration changes
   // send changing notification of turning on/off features from user's config
+  /*
   context.subscriptions.push(workspace.onDidChangeConfiguration(e => {
-    if (e.affectsConfiguration('stataServer')) {
-      console.log('Configures in stataServer changed')
-      const comParam: DidChangeConfigurationParams = { settings: 200 }
+    if (e.affectsConfiguration('stataServer.enableCompletion')) {
+      const value: any = workspace.getConfiguration('').get('stataServer.enableCompletion');
+      console.log(value)
+      const comParam: DidChangeConfigurationParams = {settings: {'enableCompletion': value}}
       client.sendNotification('workspace/didChangeConfiguration', comParam)
     }
-  }));
 
+    if (e.affectsConfiguration('stataServer.enableDocstring')) {
+      const value: any = workspace.getConfiguration('').get('stataServer.enableDocstring');
+      console.log(value)
+      const comParam: DidChangeConfigurationParams = {settings: {'enableDocstring': value}}
+      client.sendNotification('workspace/didChangeConfiguration', comParam)
+    }
+
+  }));
+  */
 }
 
 export function deactivate(): Thenable<void> {

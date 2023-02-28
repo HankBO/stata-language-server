@@ -1,18 +1,19 @@
 import server.utils as utils
-from pygls.lsp.types.basic_structures import Diagnostic, DiagnosticSeverity
-from pygls.lsp.types.workspace import (ConfigurationItem, ConfigurationParams,
-     DidChangeTextDocumentParams, DidCloseTextDocumentParams, DidOpenTextDocumentParams,
-     DidChangeConfigurationParams)
+from lsprotocol.types import Diagnostic, DiagnosticSeverity
+from lsprotocol.types import (ConfigurationItem, WorkspaceConfigurationParams, DidChangeTextDocumentParams,
+                              DidCloseTextDocumentParams, DidOpenTextDocumentParams,
+                              DidChangeConfigurationParams)
 from typing import Optional
 import re
-from pygls.lsp.methods import (COMPLETION, HOVER, DEFINITION, TEXT_DOCUMENT_DID_CHANGE,
-                               TEXT_DOCUMENT_DID_CLOSE,
-                               TEXT_DOCUMENT_DID_OPEN, WORKSPACE_DID_CHANGE_CONFIGURATION)
+from lsprotocol.types import (TEXT_DOCUMENT_COMPLETION, TEXT_DOCUMENT_HOVER,
+                              TEXT_DOCUMENT_DEFINITION, TEXT_DOCUMENT_DID_CHANGE, TEXT_DOCUMENT_DID_CLOSE,
+                              TEXT_DOCUMENT_DID_OPEN, WORKSPACE_DID_CHANGE_CONFIGURATION,
+                              WORKSPACE_CONFIGURATION)
 from pygls.server import LanguageServer
-from pygls.lsp.types import (CompletionList, CompletionParams, Location, DefinitionParams,
-                             Hover, HoverParams, Position, Range)
+from lsprotocol.types import (CompletionList, CompletionParams, Location, DefinitionParams,
+                              Hover, HoverParams, Position, Range)
 from server.constants import (MAX_LINE_LENGTH_MESSAGE, OPERATOR_REGEX, STRING, STAR_COMMENTS,
-                              WHITESPACE_AFTER_COMMA_REGEX, OPERATOR_REGEX, BLOCK_COMMENTS_BG,
+                              WHITESPACE_AFTER_COMMA_REGEX, BLOCK_COMMENTS_BG,
                               BLOCK_COMMENTS_END, INLINE_COMM_RE, LOOP_START, LOOP_END, INDENT_REGEX,
                               OP_WHITESPACE_MESSAGE, COMMA_WHITESPACE_MESSAGE, INAP_INDENT_MESSAGE,
                               MAX_LINE_LENGTH_SEVERITY, MAX_LINE_LENGTH, INDENT_SPACE,
@@ -23,8 +24,11 @@ from server.constants import (MAX_LINE_LENGTH_MESSAGE, OPERATOR_REGEX, STRING, S
 class StataLanguageServer(LanguageServer):
     CONFIGURATION_SECTION = 'stataServer'
 
+    def __init__(self, *args):
+        super().__init__(*args)
 
-stata_server = StataLanguageServer()
+
+stata_server = StataLanguageServer('stataLSP', 'v1')
 COMLIST = utils.getComList()
 
 
@@ -38,19 +42,20 @@ def did_change(ls, params: DidChangeTextDocumentParams):
 @stata_server.feature(TEXT_DOCUMENT_DID_CLOSE)
 def did_close(ls: StataLanguageServer, params: DidCloseTextDocumentParams):
     """Text document did close notification."""
-    ls.show_message_log('Stata File Did Close')
+    #ls.show_message('Stata File Did Close')
     clear_diagnostics(ls, params)
 
 
 @stata_server.feature(TEXT_DOCUMENT_DID_OPEN)
 async def did_open(ls, params: DidOpenTextDocumentParams):
     """Text document did open notification."""
-    ls.show_message_log('Stata File Did Open')
+    #ls.show_message('Stata File Did Open')
+    await get_configuration_callback(stata_server)
     if ENABLESTYLECHECKING:
         refresh_diagnostics(ls, params)
 
 
-@stata_server.feature(COMPLETION)
+@stata_server.feature(TEXT_DOCUMENT_COMPLETION)
 def completions(params: Optional[CompletionParams] = None) -> CompletionList:
     """Return completion items."""
     if ENABLECOMPLETION:
@@ -59,7 +64,7 @@ def completions(params: Optional[CompletionParams] = None) -> CompletionList:
         return None
 
 
-@stata_server.feature(HOVER)
+@stata_server.feature(TEXT_DOCUMENT_HOVER)
 def hover(ls, params: HoverParams):
     """Display Markdown documentation for the element under the cursor."""
     if ENABLEDOCSTRING:
@@ -71,7 +76,7 @@ def hover(ls, params: HoverParams):
         return None
 
 
-@stata_server.feature(DEFINITION)
+@stata_server.feature(TEXT_DOCUMENT_DEFINITION)
 def goto_definition(ls, params: DefinitionParams):
     """
         Go to the last definition of a var: g(enerate) varname
@@ -136,7 +141,8 @@ def refresh_diagnostics(ls: StataLanguageServer, params):
     for lineno, line in enumerate(doc.lines):
         # Max line length
         if len(line) > MAX_LINE_LENGTH:
-            diagnostics.append(create_diagnostic(lineno, MAX_LINE_LENGTH, MAX_LINE_LENGTH, MAX_LINE_LENGTH_MESSAGE, MAX_LINE_LENGTH_SEVERITY))
+            diagnostics.append(create_diagnostic(lineno, MAX_LINE_LENGTH,
+                               MAX_LINE_LENGTH, MAX_LINE_LENGTH_MESSAGE, MAX_LINE_LENGTH_SEVERITY))
         skip_tokens = []
 
         # Comment block
@@ -193,8 +199,8 @@ def refresh_diagnostics(ls: StataLanguageServer, params):
             start, end = match.start(1), match.end(1)
             if not inSkipTokens(start, end, skip_tokens):
                 if end - start != 1:
-                    diagnostics.append(
-                            create_diagnostic(lineno, end, end, COMMA_WHITESPACE_MESSAGE, COMMA_WHITESPACE_SEVERITY))
+                    diagnostics.append(create_diagnostic(lineno, end, end, COMMA_WHITESPACE_MESSAGE,
+                                                         COMMA_WHITESPACE_SEVERITY))
 
         # Loop Indent Checker
         if re.match(LOOP_END, line) and LINE_STATE['loopLevel'] > 0:
@@ -205,12 +211,13 @@ def refresh_diagnostics(ls: StataLanguageServer, params):
             start, end = match.start(1), match.end(1)
             actual_space = end - start
             if actual_space != LINE_STATE['loopLevel'] * INDENT_SPACE:
-                diagnostics.append(create_diagnostic(lineno, end, end, INAP_INDENT_MESSAGE, INAP_INDENT_SEVERITY))
+                diagnostics.append(create_diagnostic(
+                    lineno, end, end, INAP_INDENT_MESSAGE, INAP_INDENT_SEVERITY))
 
         if re.match(LOOP_START, line):
             LINE_STATE['loopLevel'] += 1
 
-    ls.publish_diagnostics(doc_uri=uri, diagnostics=diagnostics)
+    ls.publish_diagnostics(uri=uri, diagnostics=diagnostics)
 
 
 def clear_diagnostics(ls: StataLanguageServer, params):
@@ -219,26 +226,39 @@ def clear_diagnostics(ls: StataLanguageServer, params):
     ls.publish_diagnostics(doc_uri=uri, diagnostics=[])
 
 
-def get_configuration_callback(ls: StataLanguageServer, *args):
-    def _config_callback(config):
-        global MAX_LINE_LENGTH, INDENT_SPACE, ENABLECOMPLETION, ENABLEDOCSTRING, ENABLESTYLECHECKING
-        try:
-            MAX_LINE_LENGTH = int(config[0].get('setMaxLineLength'))
-            INDENT_SPACE = int(config[0].get('setIndentSpace'))
-            ENABLECOMPLETION = config[0].get('enableCompletion')
-            ENABLEDOCSTRING = config[0].get('enableDocstring')
-            ENABLESTYLECHECKING = config[0].get('enableStyleChecking')
-        except Exception as e:
-            ls.show_message_log(f'Error ocurred: {e}')
-    ls.get_configuration(ConfigurationParams(items=[
+def _config_callback(config):
+    global MAX_LINE_LENGTH, INDENT_SPACE, ENABLECOMPLETION, ENABLEDOCSTRING, ENABLESTYLECHECKING
+    try:
+        MAX_LINE_LENGTH = int(config[0].get('setMaxLineLength'))
+        INDENT_SPACE = int(config[0].get('setIndentSpace'))
+        ENABLECOMPLETION = config[0].get('enableCompletion')
+        ENABLEDOCSTRING = config[0].get('enableDocstring')
+        ENABLESTYLECHECKING = config[0].get('enableStyleChecking')
+    except Exception as e:
+        print(f'Error ocurred: {e}')
+
+
+async def get_configuration_callback(ls: StataLanguageServer, *args):
+    config = await ls.get_configuration_async(WorkspaceConfigurationParams(items=[
         ConfigurationItem(
             scope_uri='',
             section=StataLanguageServer.CONFIGURATION_SECTION
         )
-    ]), _config_callback)
+    ]))
+
+    _config_callback(config)
+
+# need a router
 
 
-@stata_server.feature(WORKSPACE_DID_CHANGE_CONFIGURATION)
+
+'''
 def refresh_config(ls, params: DidChangeConfigurationParams):
-    if params.settings == 200:
-        get_configuration_callback(ls)
+    if 'enableCompletion' in params.settings:
+        global ENABLECOMPLETION
+        ENABLECOMPLETION = params.settings['enableCompletion']
+    
+    if 'enableDocstring' in params.settings:
+        global ENABLEDOCSTRING
+        ENABLEDOCSTRING = params.settings['enableDocstring']
+'''

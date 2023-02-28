@@ -1,6 +1,6 @@
 """Define Regex for codestyle checking."""
 import re
-from pygls.lsp.types.basic_structures import DiagnosticSeverity
+from lsprotocol.types import DiagnosticSeverity
 
 # Configures
 MAX_LINE_LENGTH = 120

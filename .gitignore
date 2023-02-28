@@ -10,3 +10,4 @@ __pycache__
 client/out
 out/
 cmdsToJson.py
+pygls1.0

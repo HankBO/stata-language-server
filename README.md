@@ -50,7 +50,7 @@ Developed based on [language server](https://microsoft.github.io/language-server
 
 ## Settings
 
-> Note: Settings can be changed by `Code -> Preferences -> Settings`. It will take effect after restarting.
+> Note: Settings can be changed by `Code -> Preferences -> Settings`. It will take effect after extension reloading.
 
 | Setting Name | Description | Default Value |
 |---|---|---|

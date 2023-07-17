@@ -248,17 +248,3 @@ async def get_configuration_callback(ls: StataLanguageServer, *args):
 
     _config_callback(config)
 
-# need a router
-
-
-
-'''
-def refresh_config(ls, params: DidChangeConfigurationParams):
-    if 'enableCompletion' in params.settings:
-        global ENABLECOMPLETION
-        ENABLECOMPLETION = params.settings['enableCompletion']
-    
-    if 'enableDocstring' in params.settings:
-        global ENABLEDOCSTRING
-        ENABLEDOCSTRING = params.settings['enableDocstring']
-'''

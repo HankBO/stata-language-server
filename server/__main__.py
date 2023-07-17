@@ -3,7 +3,7 @@ import logging
 
 from .server import stata_server
 
-logging.basicConfig(filename="pygls.log", level=logging.DEBUG, filemode="w")
+logging.basicConfig(filename="pygls.log", level=logging.ERROR, filemode="w")
 
 
 def add_arguments(parser):

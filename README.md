@@ -48,6 +48,10 @@ Developed based on [language server](https://microsoft.github.io/language-server
 
 > Note: The extension takes the value(default `python`) of `python.pythonPath` in VSCode's Settings as the running version. You may check that terminal command `python` are correctly linked to v3.6 or later, or change the path to a full path in VSCode.
 
+- pygls == 1.0.2
+
+> Note: currently StataLS checks if the version of pygls is 1.0.2 and will reinstall if not. This is a workaround solution for dependency troubles of pygls's upgrade.
+
 ## Settings
 
 > Note: Settings can be changed by `Code -> Preferences -> Settings`. It will take effect after extension reloading.

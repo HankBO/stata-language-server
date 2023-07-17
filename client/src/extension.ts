@@ -19,9 +19,18 @@ import * as child_process from "child_process";
  *
  * @param python path of the python interpreter
  */
+  // change function name: pyglsInstallNeeded
  function ispyglsInstalled(python: string): boolean {
   try {
-    child_process.execFileSync(python, ["-c", "import pygls"]);
+    // checking pygls's version
+    const ver: string = child_process.execFileSync(python, ["-c", "import pygls; print(pygls.__version__)"])
+                            .toString().trim().split('\n')[0];
+    console.debug(ver);
+    // hardcode for avoding loading requirements.txt everytime
+    // TODO: loading config
+    if (ver != "1.0.2") {
+      return false;
+    }
     return true;
   } catch {
     return false;

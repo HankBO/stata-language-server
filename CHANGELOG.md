@@ -7,7 +7,7 @@ and this project adheres to [Semantic Versioning][semver].
 
 ## [1.1.3]
 
-- Dependency updates: need pygls 1.0.1, drop support for Python 3.6
+- Dependency updates: need pygls 1.0.2, drop support for Python 3.6
 - Changed settings loading method.
 
 ## [1.1.2]
